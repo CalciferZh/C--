@@ -1,2 +1,2 @@
-# C--
-A C-- plastic compiler.
+# JavaScript--
+A Javascript-- plastic compiler.
