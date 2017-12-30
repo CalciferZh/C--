@@ -1,5 +1,5 @@
-var string1 = 'this is some fxxking string';
-var string2 = 'this is a si siht';
+var string1 = "this is some fxxking string";
+var string2 = "this is a si siht";
 var len1 = 27;
 var len2 = 17;
 var i = 0;
@@ -11,7 +11,7 @@ while (i < len2) {
 }
 
 if (flag == 0) {
-  print('Yes');
+  print("Yes");
 } else {
-  print('No');
+  print("No");
 }
