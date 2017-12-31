@@ -25,14 +25,16 @@
     tok_integer = -16,
     tok_real = -17,
 
-
     // extended tokens
     tok_lessOp = -18,
     tok_greaterOp = -19,
     tok_euqalOp = -20,
     tok_modOp = -21,
+    tok_lSquareBracket = -22,
+    tok_rSquareBracket = -23,
+    tok_nEqualOp = -24,
 
-    tok_identifier = -22    
+    tok_identifier = -25
   };
 %}
 
@@ -50,28 +52,31 @@ number  {num1}|{num2}
 
 %%
 
-{ws}                /* skip blanks and tabs */
-var                 return(tok_var);
-if                  return(tok_if);
-else                return(tok_else);
-while               return(tok_while);
-=                   return(tok_assignOp);
-\;                   return(tok_semicolon);
-\(                   return(tok_lParenthesis);
-\)                   return(tok_rParenthesis);  
-\{                   return(tok_lBrace);
-\}                   return(tok_rBrace);
-\+                   return(tok_addOp);
-\-                   return(tok_subtractOp);
-\*                   return(tok_multiplyOp);
-\/                   return(tok_divideOp);
-{string}            return(tok_string);
-{int}               return(tok_integer);
-{real}              return(tok_real);
-\<                   return(tok_lessOp);
-\>                   return(tok_greaterOp);
-\==                  return(tok_euqalOp);
-\%                   return(tok_modOp);
-{name}              return(tok_identifier);
+{ws}                  /* skip blanks and tabs */
+var                   return(tok_var);
+if                    return(tok_if);
+else                  return(tok_else);
+while                 return(tok_while);
+=                     return(tok_assignOp);
+\;                    return(tok_semicolon);
+\(                    return(tok_lParenthesis);
+\)                    return(tok_rParenthesis);  
+\{                    return(tok_lBrace);
+\}                    return(tok_rBrace);
+\+                    return(tok_addOp);
+\-                    return(tok_subtractOp);
+\*                    return(tok_multiplyOp);
+\/                    return(tok_divideOp);
+{string}              return(tok_string);
+{int}                 return(tok_integer);
+{real}                return(tok_real);
+\<                    return(tok_lessOp);
+\>                    return(tok_greaterOp);
+\==                   return(tok_euqalOp);
+\!=                   return(tok_nEqualOp);
+\%                    return(tok_modOp);
+{name}                return(tok_identifier);
+\[                    return(tok_lSquareBracket);
+\]                    return(tok_rSquareBracket);
 
 %%
