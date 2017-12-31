@@ -1,0 +1,17 @@
+all: lexer.o
+
+lexer.o: lexer.h lexer.cpp lex.yy.o
+	g++ -c -std=c++11 -o lexer.o lex.yy.o lexer.cpp
+
+lex.yy.o: lex.yy.cc
+	g++ -c -std=c++11 -o lex.yy.o lex.yy.cc
+
+lex.yy.cc: js--.lex
+	flex++ js--.lex
+
+clean:
+	rm -f *.o lex.yy.cc sample
+
+sample: all
+	g++ -std=c++11 sample.cpp lexer.o lex.yy.o -o sample	
+	./sample
