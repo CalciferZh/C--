@@ -13,9 +13,11 @@
 // we simply use string, so we can translate them later
 class Token {
 public:
-  Token(int tokenType, std::string tokenValue) : tp(tokenType), val(std::move(tokenValue)) {}
   int tp;
+
   std::string val;
+
+  Token(int tokenType, std::string tokenValue) : tp(tokenType), val(std::move(tokenValue)) {}
 };
 
 // Lexer class
@@ -23,15 +25,20 @@ public:
 // then call 'analyze'
 class Lexer {
 public:
+  std::vector<Token> analyze();
+
+  std::string src;
+
+  std::ifstream srcStream;
+
+  FlexLexer *worker;
+
   Lexer(std::string filePath) : src(filePath) {
     srcStream.open(filePath.c_str());
     worker = new yyFlexLexer(&srcStream);
   }
+
   ~Lexer() {delete worker;}
-  std::vector<Token> analyze();
-  std::string src;
-  std::ifstream srcStream;
-  FlexLexer* worker;
 };
 
 

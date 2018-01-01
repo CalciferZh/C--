@@ -1,0 +1,1 @@
+var string1 = "this is some fxxking string";
