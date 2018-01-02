@@ -1,12 +1,12 @@
-all: lexer.o
+all: lexer.o lex.yy.o
 
-lexer.o: lexer.h lexer.cpp lex.yy.o
-	g++ -c -std=c++11 -o lexer.o lex.yy.o lexer.cpp
+lexer.o: lexer.h lexer.cpp
+	g++ -c -std=c++11 -o lexer.o lexer.cpp
 
 lex.yy.o: lex.yy.cc
 	g++ -c -std=c++11 -o lex.yy.o lex.yy.cc
 
-lex.yy.cc: js--.lex
+lex.yy.cc: js--.lex token.h
 	flex++ js--.lex
 
 clean:

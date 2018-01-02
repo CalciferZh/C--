@@ -1,34 +1,44 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "AST.h"
+#include "./AST.h"
 #include "../lexer/lexer.h"
+#include "../lexer/token.h"
+#include <utility>
 
 class Parser {
 public:
   std::vector<Token> tkStream;
 
-  static std::map<int, int> precTable;
+  std::map<int, int> precTable = {
+    {tok_assignOp, 2},
+    {tok_lessOp, 10},
+    {tok_greaterOp, 10},
+    {tok_addOp, 20},
+    {tok_subtractOp, 20},
+    {tok_multiplyOp, 40},
+    {tok_divideOp, 40}
+  };
 
   std::map<std::string, llvm::AllocaInst*> varTable;
 
   llvm::LLVMContext context;
 
-  llvm::IRBuilder<> builder(context);
+  llvm::IRBuilder<> builder;
 
-  std::unique_ptr<Module> module;
+  std::unique_ptr<llvm::Module> module;
 
-  std::vector<std::unique<FunctionAST>> functions;
+  std::vector<std::unique_ptr<FunctionAST>> functions;
 
-  std::vector<std::unique<ExprAST>> expressions;
+  std::vector<std::unique_ptr<ExprAST>> expressions;
 
-  size_type curIdx;
+  size_t curIdx;
 
-  Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)) {}
+  Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)), builder(llvm::IRBuilder<>(context)) {}
 
   void parse();
 
-  // check for parse errors
+  // check for parse errors (literally, nullptr in vector)
   void check();
 
   // i.e. 3.1415
@@ -65,6 +75,6 @@ public:
   std::unique_ptr<ExprAST> parseDeclareExpr();
 
   int getCurTkPrec();
-}
+};
 
 #endif

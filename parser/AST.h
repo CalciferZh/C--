@@ -1,5 +1,5 @@
-#ifndef __PARSER_H__
-#define __PARSER_H__
+#ifndef __AST_H__
+#define __AST_H__
 
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
@@ -26,7 +26,7 @@ class ExprAST {
 public:
   virtual ~ExprAST() = default;
 
-  virtual llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) = 0;
+  // virtual llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) = 0;
 };
 
 class RealExprAST : public ExprAST {
@@ -35,7 +35,7 @@ public:
 
   RealExprAST(double val) : val(val) {}
 
-  llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
 class IntExprAST : public ExprAST
@@ -45,7 +45,7 @@ public:
 
   IntExprAST(int val) : val(val) {}
 
-  llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
 class StringExprAST : public ExprAST
@@ -55,7 +55,7 @@ public:
 
   StringExprAST(const std::string& val) : val(val) {}
 
-  llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
 class VariableExprAST : public ExprAST {
@@ -64,7 +64,7 @@ public:
 
   VariableExprAST(const std::string& name) : name(name) {}
 
-  llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
 class BinaryExprAST : public ExprAST {
@@ -76,7 +76,7 @@ public:
 
   BinaryExprAST(int op, std::unique_ptr<ExprAST> LHS, std::unique_ptr<ExprAST> RHS) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
 
-  llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
 class DeclareExprAST : public ExprAST {
@@ -87,7 +87,7 @@ public:
 
   DeclareExprAST(std::string varName, std::unique_ptr<ExprAST> init) : varName(std::move(varName)), init(std::move(init)) {}
 
-  llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
 class PrototypeAST {
@@ -96,9 +96,9 @@ public:
 
   std::vector<std::string> args;
 
-  PrototypeAST::PrototypeAST(const std::string& name, std::vector<std::string> args) : name(name), args(std::move(args)) {}
+  PrototypeAST(const std::string& name, std::vector<std::string> args) : name(name), args(std::move(args)) {}
 
-  llvm::Function* codegen();
+  // llvm::Function* codegen();
 };
 
 class FunctionAST {
@@ -107,9 +107,9 @@ public:
 
   std::vector<std::unique_ptr<ExprAST>> body;
 
-  FunctionAST::FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
+  FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
 
-  llvm::Function* codegen();
+  // llvm::Function* codegen();
 };
 
 #endif

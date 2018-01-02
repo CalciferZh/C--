@@ -1,4 +1,4 @@
-#include "parser.cpp"
+#include "parser.h"
 #include "../lexer/lexer.h"
 
 using namespace std;

@@ -1,13 +1,10 @@
 #include "parser.h"
 
-std::map<int, int> Parser::precTable = {
-  {tok_assignOp, 2},
-  {tok_lessOp, 10},
-  {tok_greaterOp, 10},
-  {tok_addOp, 20},
-  {tok_subtractOp, 20},
-  {tok_multiplyOp, 40},
-  {tok_divideOp, 40}
+std::unique_ptr<ExprAST> Parser::parseIntExpr()
+{
+  auto result = llvm::make_unique<IntExprAST>(std::stoi(tkStream[curIdx].val));
+  ++curIdx;
+  return std::move(result);
 }
 
 std::unique_ptr<ExprAST> Parser::parseRealExpr()
@@ -17,16 +14,9 @@ std::unique_ptr<ExprAST> Parser::parseRealExpr()
   return std::move(result);
 }
 
-std::unique_ptr<ExprAST> Parser::parseIntExpr()
-{
-  auto result = llvm::make_unique<IntExprAST>(std::stoi(tkStream[curIdx].val));
-  ++curIdx;
-  return std::move(result);
-}
-
 std::unique_ptr<ExprAST> Parser::parseStringExpr()
 {
-  auto result = llvm::make_unique<StringAST>(tkStream[curIdx].val);
+  auto result = llvm::make_unique<StringExprAST>(tkStream[curIdx].val);
   ++curIdx;
   return std::move(result);
 }
@@ -59,14 +49,14 @@ std::unique_ptr<ExprAST> Parser::parseBraceExpr()
   return inner;
 }
 
-std::unique_ptr<ExprAST> Parser::parseSqrExpr()
+std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr()
 {
   ++curIdx; // eat '['
   auto inner = parseExpression();
   if (!inner) {
     return nullptr;
   }
-  if (tkStream[curIdx].tp != tok_rSqrBracket) {
+  if (tkStream[curIdx].tp != tok_rSquareBracket) {
     return nullptr;
   }
   ++curIdx; // eat ']'
@@ -93,6 +83,7 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
   }
   ++curIdx; // eat '='
   auto init = parseExpression();
+  ++curIdx; // est ';'
 
   return llvm::make_unique<DeclareExprAST>(varTk.val, std::move(init));
 }
@@ -113,7 +104,7 @@ std::unique_ptr<ExprAST> Parser::parsePrimary()
   }
 }
 
-std::unique_ptr<ExprAST> parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS)
+std::unique_ptr<ExprAST> Parser::parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS)
 {
   while (true) {
     int curTkPrec = getCurTkPrec();
@@ -133,7 +124,7 @@ std::unique_ptr<ExprAST> parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS)
         return nullptr;
       }
     }
-    LHS = llvm::make_unique<BinaryExprAST>(tkOp.tp, LHS, RHS);
+    LHS = llvm::make_unique<BinaryExprAST>(tkOp.tp, std::move(LHS), std::move(RHS));
   }
 }
 
@@ -155,17 +146,18 @@ void Parser::parse()
         expressions.emplace_back(std::move(parseDeclareExpr()));
         break;
       default:
-        std::cout << "Unexpected symbol type."
+        std::cout << "Unexpected symbol type.";
         break;
     }
   }
 }
 
-int getCurTkPrec()
+int Parser::getCurTkPrec()
 {
-  int prec = precTable.at(tkStream[curIdx].tp);
-  if (prec == std::out_of_range) {
-    prec = -1;
+  auto prec = precTable.find(tkStream[curIdx].tp);
+  if(prec != precTable.end()) {
+    return prec->first;
+  } else {
+    return -1;
   }
-  return prec;
 }

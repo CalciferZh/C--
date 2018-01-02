@@ -6,19 +6,7 @@
 #include <iostream>
 #include <utility>
 #include <FlexLexer.h>
-
-// Token class
-// token types are defined in js--.lex (and generated lex.yy.cc)
-// since token value may be string, double, int and NULL(keywords)
-// we simply use string, so we can translate them later
-class Token {
-public:
-  int tp;
-
-  std::string val;
-
-  Token(int tokenType, std::string tokenValue) : tp(tokenType), val(std::move(tokenValue)) {}
-};
+#include "token.h"
 
 // Lexer class
 // specify source file path when constructed
