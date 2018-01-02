@@ -115,14 +115,14 @@ std::unique_ptr<ExprAST> Parser::parsePrimary()
 
 std::unique_ptr<ExprAST> Parser::parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS)
 {
-  std::cout << "Parsing binary operator RHS expression." << '\n';
   while (true) {
+    std::cout << "Parsing binary operator RHS expression." << '\n';
+    auto& tkOp = tkStream[curIdx];
     int curTkPrec = getCurTkPrec();
     if (curTkPrec < prec) {
       return LHS;
     }
-    auto& tkOp = tkStream[curIdx];
-    ++curIdx;
+    ++curIdx; // eat op
     auto RHS = parsePrimary();
     if (!RHS) {
       return nullptr;
@@ -145,6 +145,7 @@ std::unique_ptr<ExprAST> Parser::parseExpression()
   if (!LHS) {
     return nullptr;
   }
+  std::cout << tkStream[curIdx].val << '\n';
   return parseBinOpRHS(0, std::move(LHS));
 }
 
@@ -157,7 +158,8 @@ void Parser::parse()
         expressions.emplace_back(std::move(parseDeclareExpr()));
         break;
       default:
-        std::cout << "Unexpected symbol type.";
+        std::cout << "Unexpected symbol:" << tkStream[curIdx].val << '\n';
+        ++curIdx;
         break;
     }
   }
@@ -166,8 +168,8 @@ void Parser::parse()
 int Parser::getCurTkPrec()
 {
   auto prec = precTable.find(tkStream[curIdx].tp);
-  if(prec != precTable.end()) {
-    return prec->first;
+  if (prec != precTable.end()) {
+    return prec->second;
   } else {
     return -1;
   }

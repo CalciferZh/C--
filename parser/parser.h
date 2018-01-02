@@ -71,11 +71,15 @@ public:
   // i.e. + b * c
   std::unique_ptr<ExprAST> parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS);
 
-  // 
+  // basic expression
   std::unique_ptr<ExprAST> parseExpression();
 
   // i.e. var i = 3.14
   std::unique_ptr<ExprAST> parseDeclareExpr();
+
+  // while loop
+  std::unique_ptr<ExprAST> parseWhileExpr();
+
 
   int getCurTkPrec();
 };

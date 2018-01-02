@@ -100,7 +100,7 @@ public:
     LHS->print();
     std::cout << "}\nRHS: {\n";
     RHS->print();
-    std::cout << "} \n";
+    std::cout << "}\n}\n";
   }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
@@ -117,6 +117,27 @@ public:
   void print() override {
     std::cout << "Declaration: { \n" << "varName: " << varName << "\ninit: {\n";
     init->print();
+    std::cout << "}\n}\n";
+  }
+
+  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+};
+
+class WhileExprAST : public ExprAST {
+public:
+  std::unique_ptr<ExprAST> cond;
+
+  std::vector<std::unique_ptr<ExprAST>> body;
+
+  WhileExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> body) : cond(std::move(cond)), body(std::move(body)) {}
+
+  void print() {
+    std::cout << "While prototype: {\n" << "condition:\n";
+    cond->print();
+    std::cout << "body:{\n";
+    for (const auto& expr: body) {
+      expr->print();
+    }
     std::cout << "}\n}\n";
   }
 
