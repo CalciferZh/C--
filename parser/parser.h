@@ -41,6 +41,8 @@ public:
   // check for parse errors (literally, nullptr in vector)
   void check();
 
+  void print();
+
   // i.e. 3.1415
   std::unique_ptr<ExprAST> parseRealExpr();
 

@@ -172,3 +172,15 @@ int Parser::getCurTkPrec()
     return -1;
   }
 }
+
+void Parser::print()
+{
+  for (const auto& expr : expressions) {
+    expr->print();
+    std::cout << '\n';
+  }
+  for (const auto& func : functions) {
+    func->print();
+    std::cout << '\n';
+  }
+}

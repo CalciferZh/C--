@@ -20,11 +20,14 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 
 
 class ExprAST {
 public:
   virtual ~ExprAST() = default;
+
+  virtual void print() = 0;
 
   // virtual llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) = 0;
 };
@@ -34,6 +37,10 @@ public:
   double val;
 
   RealExprAST(double val) : val(val) {}
+
+  void print() override {
+    std::cout << "Real number: " << val << '\n';
+  }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
@@ -45,6 +52,10 @@ public:
 
   IntExprAST(int val) : val(val) {}
 
+  void print() override {
+    std::cout << "Integer: " << val << '\n';
+  }
+
   // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
@@ -55,6 +66,10 @@ public:
 
   StringExprAST(const std::string& val) : val(val) {}
 
+  void print() override {
+    std::cout << "String: " << val << '\n';
+  }
+
   // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
@@ -63,6 +78,10 @@ public:
   std::string name;
 
   VariableExprAST(const std::string& name) : name(name) {}
+
+  void print() override {
+    std::cout << "variable: " << name << '\n';
+  }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
@@ -76,6 +95,14 @@ public:
 
   BinaryExprAST(int op, std::unique_ptr<ExprAST> LHS, std::unique_ptr<ExprAST> RHS) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
 
+  void print() override {
+    std::cout << "expression: " << op << " { \nLHS: {\n";
+    LHS->print();
+    std::cout << "}\nRHS: {\n";
+    RHS->print();
+    std::cout << "} \n";
+  }
+
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
@@ -86,6 +113,12 @@ public:
   std::unique_ptr<ExprAST> init;
 
   DeclareExprAST(std::string varName, std::unique_ptr<ExprAST> init) : varName(std::move(varName)), init(std::move(init)) {}
+
+  void print() override {
+    std::cout << "Declaration: { \n" << "varName: " << varName << "\ninit: {\n";
+    init->print();
+    std::cout << "}\n}\n";
+  }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
@@ -98,6 +131,14 @@ public:
 
   PrototypeAST(const std::string& name, std::vector<std::string> args) : name(name), args(std::move(args)) {}
 
+  void print() {
+    std::cout << "Function prototype: { \n" << "name: " << name << " \nargs:\n";
+    for (const auto& arg: args) {
+      std::cout << arg << ", ";
+    }
+    std::cout << "} \n";
+  }
+
   // llvm::Function* codegen();
 };
 
@@ -109,6 +150,15 @@ public:
 
   FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
 
+  void print() {
+    std::cout << "Function: {\n" << "prototype:\n";
+    proto->print();
+    std::cout << "body: {\n";
+    for (const auto& expr: body) {
+      expr->print();
+    }
+    std::cout << "}\n}\n";
+  }
   // llvm::Function* codegen();
 };
 

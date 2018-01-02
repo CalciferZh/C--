@@ -9,6 +9,7 @@ int main()
   vector<Token> strm = lexer.analyze();
   Parser parser(strm);
   parser.parse();
+  parser.print();
   return 0;
 }
 
