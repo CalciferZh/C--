@@ -82,6 +82,7 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
   std::cout << "Parsing declaration expression." << '\n';
   ++curIdx; // eat 'var'
   if (tkStream[curIdx].tp != tok_identifier) {
+    std::cout << "return!" << std::endl;
     return nullptr;
   }
   auto& varTk = tkStream[curIdx];
@@ -91,6 +92,9 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
   }
   ++curIdx; // eat '='
   auto init = parseExpression();
+  if (tkStream[curIdx].tp != tok_semicolon) {
+    return nullptr;
+  }
   ++curIdx; // est ';'
 
   return llvm::make_unique<DeclareExprAST>(varTk.val, std::move(init));
@@ -145,8 +149,49 @@ std::unique_ptr<ExprAST> Parser::parseExpression()
   if (!LHS) {
     return nullptr;
   }
-  std::cout << tkStream[curIdx].val << '\n';
   return parseBinOpRHS(0, std::move(LHS));
+}
+
+std::unique_ptr<ExprAST> Parser::parseStatement()
+{
+  std::cout << "Parsing statement.\n";
+  switch(tkStream[curIdx].tp) {
+    case tok_var:
+      return parseDeclareExpr();
+    case tok_identifier:
+      return parseAssignExpr();
+    case tok_while:
+      return parseWhileExpr();
+    case tok_if:
+      return parseIfExpr();
+    default:
+      return nullptr;
+  }
+}
+
+std::unique_ptr<ExprAST> Parser::parseAssignExpr()
+{
+  return nullptr;
+}
+
+std::unique_ptr<ExprAST> Parser::parseIfExpr()
+{
+  return nullptr;
+}
+
+std::unique_ptr<ExprAST> Parser::parseWhileExpr()
+{
+  return nullptr;
+}
+
+std::unique_ptr<FunctionAST> Parser::parseFunction()
+{
+  return nullptr;
+}
+
+std::unique_ptr<FunctionAST> Parser::parseExtern()
+{
+  return nullptr;
 }
 
 void Parser::parse()
@@ -154,12 +199,14 @@ void Parser::parse()
   curIdx = 0;
   while (curIdx < tkStream.size()) {
     switch (tkStream[curIdx].tp) {
-      case tok_var:
-        expressions.emplace_back(std::move(parseDeclareExpr()));
+      case tok_function:
+        functions.emplace_back(std::move(parseFunction()));
+        break;
+      case tok_extern:
+        functions.emplace_back(std::move(parseExtern()));
         break;
       default:
-        std::cout << "Unexpected symbol:" << tkStream[curIdx].val << '\n';
-        ++curIdx;
+        expressions.emplace_back(std::move(parseStatement()));
         break;
     }
   }

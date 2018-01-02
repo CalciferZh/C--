@@ -14,7 +14,7 @@ In `Parser::parse()`, parser looply parse top-level sentences. The deduction rul
 
 * top-level -> statement | function | extern
 
-* statement -> declare | assign | while | if-else
+* statement -> declare | assign | while | if-else | call
 
 * declare -> 'var' identifier '=' expression
 
@@ -28,7 +28,7 @@ In `Parser::parse()`, parser looply parse top-level sentences. The deduction rul
 
 * prototype -> identifier '(' identifier* ')'
 
-* body -> expression*
+* body -> statement*
 
 ### Data Member
 

@@ -80,6 +80,15 @@ public:
   // while loop
   std::unique_ptr<ExprAST> parseWhileExpr();
 
+  std::unique_ptr<ExprAST> parseAssignExpr();
+
+  std::unique_ptr<ExprAST> parseIfExpr();
+
+  std::unique_ptr<FunctionAST> parseFunction();
+
+  std::unique_ptr<FunctionAST> parseExtern();
+
+  std::unique_ptr<ExprAST> parseStatement();
 
   int getCurTkPrec();
 };

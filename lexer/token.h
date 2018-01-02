@@ -36,8 +36,10 @@ enum {
   tok_lSquareBracket = -22,
   tok_rSquareBracket = -23,
   tok_nEqualOp = -24,
+  tok_function = -25,
+  tok_extern = -26,
 
-  tok_identifier = -25
+  tok_identifier = -27
 };
 
 // Token class
