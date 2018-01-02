@@ -17,6 +17,11 @@ the program structure.
 `expressions` holds all top-level senteces in order, and `functions` holds all user
 defined functions. Note that we currently don't support in-function function definition.
 
+### Variables
+
+In AST node we save variable's name, and we can look for more details via
+`std::map<std::string, std::unique_ptr<Variable>> varTable`.
+
 ### Parse
 
 In `Parse::parse()`, the parse will scan the token stream, and

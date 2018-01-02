@@ -2,6 +2,7 @@
 #define __PARSER_H__
 
 #include "./AST.h"
+#include "./variable.h"
 #include "../lexer/lexer.h"
 #include "../lexer/token.h"
 #include <utility>
@@ -20,7 +21,7 @@ public:
     {tok_divideOp, 40}
   };
 
-  std::map<std::string, llvm::AllocaInst*> varTable;
+  std::map<std::string, std::unique_ptr<Variable>> varTable;
 
   llvm::LLVMContext context;
 
