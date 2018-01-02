@@ -10,8 +10,8 @@ lex.yy.cc: js--.lex
 	flex++ js--.lex
 
 clean:
-	rm -f *.o lex.yy.cc sample
+	rm -f *.o lex.yy.cc example
 
-sample: all
-	g++ -std=c++11 sample.cpp lexer.o lex.yy.o -o sample	
-	./sample
+example: all
+	g++ -std=c++11 example.cpp lexer.o lex.yy.o -o example	
+	./example
