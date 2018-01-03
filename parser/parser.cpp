@@ -209,7 +209,13 @@ std::unique_ptr<ExprAST> Parser::parseIfExpr()
 
 std::unique_ptr<ExprAST> Parser::parseWhileExpr()
 {
-  return nullptr;
+  ++curIdx; // eat while
+
+  auto cond = std::move(parseParenExpr());
+
+  auto body = parseBraceExpr();
+
+  return llvm::make_unique<WhileExprAST>(std::move(cond), std::move(body));
 }
 
 std::unique_ptr<FunctionAST> Parser::parseFunction()

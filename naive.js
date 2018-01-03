@@ -11,3 +11,7 @@ if (int3 < int4) {
   int4 = int3;
   int1 = int3;
 }
+
+while (int3 > 0) {
+  int3 = int3 - 1;
+}
