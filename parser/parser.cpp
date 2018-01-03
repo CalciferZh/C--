@@ -70,9 +70,14 @@ std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr()
 std::unique_ptr<ExprAST> Parser::parseIdentifierExpr()
 {
   std::cout << "Parsing identifier expression." << '\n';
-  auto result = llvm::make_unique<VariableExprAST>(tkStream[curIdx].val);
-  ++curIdx;
-  return std::move(result);
+  auto name = tkStream[curIdx].val;
+  ++curIdx; // eat identifier
+  if (tkStream[curIdx].tp == tok_lSquareBracket) {
+    auto offset = parseSqrBrktExpr();
+    return llvm::make_unique<VariableExprAST>(name, std::move(offset));
+  } else {
+    return llvm::make_unique<VariableExprAST>(name);
+  }
 }
 
 std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
@@ -220,6 +225,10 @@ std::unique_ptr<ExprAST> Parser::parseWhileExpr()
 
 std::unique_ptr<FunctionAST> Parser::parseFunction()
 {
+  // ++curIdx; // eat 'function'
+
+
+
   return nullptr;
 }
 

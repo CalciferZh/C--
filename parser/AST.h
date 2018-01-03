@@ -77,10 +77,20 @@ class VariableExprAST : public ExprAST {
 public:
   std::string name;
 
-  VariableExprAST(const std::string& name) : name(name) {}
+  std::unique_ptr<ExprAST> offset;
+
+  VariableExprAST(const std::string& name) : name(name), offset(llvm::make_unique<IntExprAST>(0)) {}
+
+  VariableExprAST(const std::string& name, std::unique_ptr<ExprAST> offset) : name(name), offset(std::move(offset)) {}
 
   void print() override {
-    std::cout << "variable: " << name << '\n';
+    std::cout << "Variable: {\n";
+
+    std::cout << "name: " << name << '\n';
+
+    std::cout << "offset: {\n";
+    offset->print();
+    std::cout << "}\n";
   }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;

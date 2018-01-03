@@ -15,3 +15,6 @@ if (int3 < int4) {
 while (int3 > 0) {
   int3 = int3 - 1;
 }
+
+var str = "This is a long string.";
+var ch = str[6];
