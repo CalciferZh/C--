@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 
+#define CODEGENPARM llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*>& varTable, llvm::LLVMContext& context, std::unique_ptr<llvm::Module> module
 
 class ExprAST {
 public:
@@ -29,7 +30,7 @@ public:
 
   virtual void print() = 0;
 
-  // virtual llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) = 0;
+  virtual llvm::Value* codegen(CODEGENPARM) = 0;
 };
 
 class RealExprAST : public ExprAST {
@@ -42,11 +43,10 @@ public:
     std::cout << "Real number: " << val << '\n';
   }
 
-  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
-class IntExprAST : public ExprAST
-{
+class IntExprAST : public ExprAST {
 public:
   int val;
 
@@ -56,11 +56,10 @@ public:
     std::cout << "Integer: " << val << '\n';
   }
 
-  // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value *codegen(CODEGENPARM) override;
 };
 
-class StringExprAST : public ExprAST
-{
+class StringExprAST : public ExprAST {
 public:
   std::string val;
 
@@ -70,7 +69,7 @@ public:
     std::cout << "String: " << val << '\n';
   }
 
-  // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value *codegen(CODEGENPARM) override;
 };
 
 class VariableExprAST : public ExprAST {
@@ -83,7 +82,7 @@ public:
     std::cout << "variable: " << name << '\n';
   }
 
-  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class BinaryExprAST : public ExprAST {
@@ -103,7 +102,7 @@ public:
     std::cout << "} \n";
   }
 
-  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class DeclareExprAST : public ExprAST {
@@ -120,7 +119,7 @@ public:
     std::cout << "}\n}\n";
   }
 
-  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class PrototypeAST {
@@ -139,7 +138,7 @@ public:
     std::cout << "} \n";
   }
 
-  // llvm::Function* codegen();
+  llvm::Function* codegen(CODEGENPARM);
 };
 
 class FunctionAST {
@@ -159,7 +158,7 @@ public:
     }
     std::cout << "}\n}\n";
   }
-  // llvm::Function* codegen();
+  llvm::Function* codegen(CODEGENPARM);
 };
 
 #endif

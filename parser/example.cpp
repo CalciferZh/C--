@@ -10,6 +10,7 @@ int main()
   Parser parser(strm);
   parser.parse();
   parser.print();
+  parser.module->dump();
   return 0;
 }
 
