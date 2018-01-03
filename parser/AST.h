@@ -76,10 +76,20 @@ class VariableExprAST : public ExprAST {
 public:
   std::string name;
 
-  VariableExprAST(const std::string& name) : name(name) {}
+  std::unique_ptr<ExprAST> offset;
+
+  VariableExprAST(const std::string& name) : name(name), offset(llvm::make_unique<IntExprAST>(0)) {}
+
+  VariableExprAST(const std::string& name, std::unique_ptr<ExprAST> offset) : name(name), offset(std::move(offset)) {}
 
   void print() override {
-    std::cout << "variable: " << name << '\n';
+    std::cout << "Variable: {\n";
+
+    std::cout << "name: " << name << '\n';
+
+    std::cout << "offset: {\n";
+    offset->print();
+    std::cout << "}\n";
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
@@ -89,7 +99,9 @@ class BinaryExprAST : public ExprAST {
 public:
   // in lexer/js--.lex : enum
   int op;
+
   std::unique_ptr<ExprAST> LHS;
+
   std::unique_ptr<ExprAST> RHS;
 
   BinaryExprAST(int op, std::unique_ptr<ExprAST> LHS, std::unique_ptr<ExprAST> RHS) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
@@ -107,19 +119,46 @@ public:
 
 class DeclareExprAST : public ExprAST {
 public:
-  std::string varName;
+  std::unique_ptr<ExprAST> var;
   
   std::unique_ptr<ExprAST> init;
 
-  DeclareExprAST(std::string varName, std::unique_ptr<ExprAST> init) : varName(std::move(varName)), init(std::move(init)) {}
+  DeclareExprAST(std::unique_ptr<ExprAST> var, std::unique_ptr<ExprAST> init) : var(std::move(var)), init(std::move(init)) {}
 
   void print() override {
-    std::cout << "Declaration: { \n" << "varName: " << varName << "\ninit: {\n";
+    std::cout << "Declaration: { \n" << "var: "; 
+    var->print();
+    std::cout << "\ninit: {\n";
     init->print();
     std::cout << "}\n}\n";
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+};
+
+class IfExprAST : public ExprAST {
+public:
+  std::unique_ptr<ExprAST> cond;
+
+  std::vector<std::unique_ptr<ExprAST>> ifBody;
+
+  std::vector<std::unique_ptr<ExprAST>> elseBody;
+
+  IfExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> ifBody, std::vector<std::unique_ptr<ExprAST>> elseBody) : cond(std::move(cond)), ifBody(std::move(ifBody)), elseBody(std::move(elseBody)) {}
+
+  void print() override {
+    std::cout << "If-else: {\n" << "condition:\n";
+    cond->print();
+    std::cout << "if body: {\n";
+    for (const auto& expr: ifBody) {
+      expr->print();
+    }
+    std::cout << "}\nelse body: {\n";
+    for (const auto &expr : elseBody) {
+      expr->print();
+    }
+    std::cout << "}\n}\n";
+  }
 };
 
 class WhileExprAST : public ExprAST {
@@ -131,7 +170,7 @@ public:
   WhileExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> body) : cond(std::move(cond)), body(std::move(body)) {}
 
   void print() {
-    std::cout << "While prototype: {\n" << "condition:\n";
+    std::cout << "While: {\n" << "condition:\n";
     cond->print();
     std::cout << "body:{\n";
     for (const auto& expr: body) {

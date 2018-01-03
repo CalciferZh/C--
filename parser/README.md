@@ -20,9 +20,9 @@ In `Parser::parse()`, parser looply parse top-level sentences. The deduction rul
 
 * assign -> identifier '=' expression
 
-* expression -> primary op primary
+* expression -> primary (op primary)*
 
-* primary -> '(' expression ')' |  string | integer | real
+* primary -> '(' expression ')' |  string | integer | real | identifier
 
 * function -> prototype body
 
