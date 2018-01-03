@@ -90,7 +90,9 @@ class BinaryExprAST : public ExprAST {
 public:
   // in lexer/js--.lex : enum
   int op;
+
   std::unique_ptr<ExprAST> LHS;
+
   std::unique_ptr<ExprAST> RHS;
 
   BinaryExprAST(int op, std::unique_ptr<ExprAST> LHS, std::unique_ptr<ExprAST> RHS) : op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {}
@@ -125,6 +127,31 @@ public:
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
+class IfExprAST : public ExprAST {
+public:
+  std::unique_ptr<ExprAST> cond;
+
+  std::vector<std::unique_ptr<ExprAST>> ifBody;
+
+  std::vector<std::unique_ptr<ExprAST>> elseBody;
+
+  IfExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> ifBody, std::vector<std::unique_ptr<ExprAST>> elseBody) : cond(std::move(cond)), ifBody(std::move(ifBody)), elseBody(std::move(elseBody)) {}
+
+  void print() override {
+    std::cout << "If-else: {\n" << "condition:\n";
+    cond->print();
+    std::cout << "if body: {\n";
+    for (const auto& expr: ifBody) {
+      expr->print();
+    }
+    std::cout << "}\nelse body: {\n";
+    for (const auto &expr : elseBody) {
+      expr->print();
+    }
+    std::cout << "}\n}\n";
+  }
+};
+
 class WhileExprAST : public ExprAST {
 public:
   std::unique_ptr<ExprAST> cond;
@@ -134,7 +161,7 @@ public:
   WhileExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> body) : cond(std::move(cond)), body(std::move(body)) {}
 
   void print() {
-    std::cout << "While prototype: {\n" << "condition:\n";
+    std::cout << "While: {\n" << "condition:\n";
     cond->print();
     std::cout << "body:{\n";
     for (const auto& expr: body) {

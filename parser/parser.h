@@ -57,7 +57,7 @@ public:
   std::unique_ptr<ExprAST> parseParenExpr();
 
   // i.e. {"expression"}
-  std::unique_ptr<ExprAST> parseBraceExpr();
+  std::vector<std::unique_ptr<ExprAST>> parseBraceExpr();
 
   // i.e. ["expression"]
   std::unique_ptr<ExprAST> parseSqrBrktExpr();
