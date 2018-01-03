@@ -159,6 +159,8 @@ public:
     }
     std::cout << "}\n}\n";
   }
+
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class WhileExprAST : public ExprAST {
@@ -177,6 +179,8 @@ public:
       expr->print();
     }
     std::cout << "}\n}\n";
+
+    llvm::Value* codegen(CODEGENPARM) override;
   }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;

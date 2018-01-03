@@ -18,11 +18,12 @@ llvm::Value* StringExprAST(CODEGENPARM) {
 
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: VariableExpr\n";
-  // Vica: The type should be changed
   if (varTable.find(name) == varTable.end()) {
     std::cout << "Unknown variable\n";
-    //varTable[name] = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, nullptr, name.c_str());
+    // Vica: The type should be changed in time
+    varTable[name] = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, nullptr, name.c_str());
   }
+  // Vica: Need to handle offset
   return builder.CreateLoad(varTable[name], name.c_str());
 }
 
@@ -67,7 +68,111 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* DeclareExprAST(CODEGENPARM) {
   std::cout << "Generating: DeclareExpr\n";
-  llvm::Value* val = init->codegen(builder, varTable, context, module);
+  llvm::Value* L = var->codegen(builder, varTable, context, module);
+  llvm::Value* R = var->codegen(builder, varTable, context, module);
+  if (!L) {
+    std::cout << "Error when create variable\n";
+    return nullptr;
+  }
+  if (!R) {
+    std::cout << "Invalid expression\n";
+    return nullptr;
+  }
+  builder.CreateStore(R, L);
+  return R;
+  /*
+  VariableExprAST *LHSE = dynamic_cast<VariableExprAST*>(var.get());
+  if (!LHSE) {
+    std::cout << "LHS must be a variable\n";
+    return nullptr;
+  }
+  llvm::Value* R = init->codegen(builder, varTable, context, module);
+  if (!R) {
+    std::cout << "Invalid Expression\n";
+    return nullptr;
+  }
+  llvm::Value* L = varTable[LHSE->getName()];
+  if (!L) {
+    std::cout << "Unknown Variable\n";
+    return nullptr;
+  }
+  builder.CreateStore(R, L);
+  return R;
+  */
+}
+
+llvm::Value* IfExprAST::codegen(CODEGENPARM) {
+  // Vica: they are vector
+  llvm::Value* CondV = cond->codegen(builder, varTable, context, module);
+  if (!CondV) {
+    std::cout << "Error in condition\n";
+    return nullptr;
+  }
+  CondV = builder.CreateFCmpONE(CondV, ConstantFP::get(context, APFloat(0.0)), "ifcond");
+  // Vica: why use function here?
+  llvm::Function *func = builder.GetInsertBlock()->getParent();
+  // Create blocks for the then and else cases.  Insert the 'then' block at the end of the function.
+  llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(context, "then", func);
+  llvm::BasicBlock* ElseBB = llvm::BasicBlock::Create(context, "else");
+  llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(context, "ifcont");
+  builder.CreateCondBr(CondV, ThenBB, ElseBB);
+  // Emit then value.
+  builder.SetInsertPoint(ThenBB);
+  Value* ThenV = then->codegen(builder, varTable, context, module);
+  if (!ThenV) {
+    std::cout << "Error in then\n";
+    return nullptr;
+  }
+  builder.CreateBr(MergeBB);
+  // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+  ThenBB = builder.GetInsertBlock();
+  // Emit else block.
+  func->getBasicBlockList().push_back(ElseBB);
+  builder.SetInsertPoint(ElseBB);
+  Value *ElseV = else->codegen(builder, varTable, context, module);
+  if (!ElseV) {
+    std::cout << "Error in else\n";
+    return nullptr;
+  }
+  builder.CreateBr(MergeBB);
+  // codegen of 'Else' can change the current block, update ElseBB for the PHI.
+  ElseBB = builder.GetInsertBlock();
+  // Emit merge block.
+  func->getBasicBlockList().push_back(MergeBB);
+  builder.SetInsertPoint(MergeBB);
+  llvm::PHINode *PN = builder.CreatePHI(Type::getDoubleTy(TheContext), 2, "iftmp");
+
+  PN->addIncoming(ThenV, ThenBB);
+  PN->addIncoming(ElseV, ElseBB);
+  return PN;
+}
+
+llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
+  llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "cond");
+  llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "body");
+  llvm::BasicBlock* FiniBB = llvm::BasicBlock::Create(context, "finish");
+  builder.CreateBr(CondBB);
+  // Emit cond value
+  builder.SetInsertPoint(CondBB);
+  llvm::Value* CondV = cond->codegen(builder, varTable, context, module);
+  if (!CondV) {
+    std::cout << "Error in condition\n";
+    return nullptr;
+  }
+  CondV = builder.CreateFCmpONE(CondV, ConstantFP::get(context, APFloat(0.0)), "whilecond");
+  builder.CreateCondBr(CondV, BodyBB, FiniBB);
+  CondBB = builder.GetInsertBlock();
+  // Emit body value
+  builder.SetInsertPoint(BodyBB);
+  llvm::Value* BodyV = body->condegen(builder, varTable, context, module);
+  if (!BodyV) {
+    std::cout << "Error in body\n";
+    return nullptr;
+  }
+  builder.CreateBr(CondBB);
+  BodyBB = builder.GetInsertBlock();
+  // Vica: What should I return?
+  return builder.SetInsertPoint(FiniBB);
 }
 
 llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
@@ -88,22 +193,22 @@ llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
 llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   std::cout << "Generating: Function\n";
   // First, check for an existing function from a previous 'extern' declaration.
-  llvm::Function* TheFunction = module->getFunction(proto->getName());
+  llvm::Function* func = module->getFunction(proto->getName());
 
-  if (!TheFunction)
-    TheFunction = proto->codegen(builder, varTable, context, module);
+  if (!func)
+    func = proto->codegen(builder, varTable, context, module);
 
-  if (!TheFunction)
+  if (!func)
     return nullptr;
 
   // Create a new basic block to start insertion into.
-  llvm::BasicBlock* BB = llvm::BasicBlock::Create(context, "entry", TheFunction);
+  llvm::BasicBlock* BB = llvm::BasicBlock::Create(context, "entry", func);
   builder.SetInsertPoint(BB);
 
   // Record the function arguments in the NamedValues map.
   // Vica: I dont know whether should I clear it
   // varTable.clear();
-  for (auto &Arg : TheFunction->args())
+  for (auto &Arg : func->args())
     varTable[Arg.getName()] = &arg;
 
   if (llvm::Value* retVal = Body->codegen(builder, varTable, context, module)) {
@@ -111,12 +216,12 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
     Builder.CreateRet(retVal);
 
     // Validate the generated code, checking for consistency.
-    llvm::verifyFunction(*TheFunction);
+    llvm::verifyFunction(*func);
 
-    return TheFunction;
+    return func;
   }
 
   // Error reading body, remove function.
-  TheFunction->eraseFromParent();
+  func->eraseFromParent();
   return nullptr;
 }
