@@ -175,7 +175,21 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
 
 std::unique_ptr<ExprAST> Parser::parseAssignExpr()
 {
-  return nullptr;
+  auto var = parseIdentifierExpr();
+
+  if (tkStream[curIdx].tp != tok_assignOp) {
+    return nullptr;
+  }
+  ++curIdx; // eat '='
+
+  auto expr = parseExpression();
+
+  if (tkStream[curIdx].tp != tok_semicolon) {
+    return nullptr;
+  }
+  ++curIdx; // eat ';'
+  
+  return llvm::make_unique<BinaryExprAST>(tok_assignOp, std::move(var), std::move(expr));
 }
 
 std::unique_ptr<ExprAST> Parser::parseIfExpr()
