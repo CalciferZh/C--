@@ -2,6 +2,7 @@
 #define __PARSER_H__
 
 #include "./AST.h"
+#include "./variable.h"
 #include "../lexer/lexer.h"
 #include "../lexer/token.h"
 #include <utility>
@@ -20,7 +21,7 @@ public:
     {tok_divideOp, 40}
   };
 
-  std::map<std::string, llvm::AllocaInst*> varTable;
+  std::map<std::string, std::unique_ptr<Variable>> varTable;
 
   llvm::LLVMContext context;
 
@@ -70,11 +71,24 @@ public:
   // i.e. + b * c
   std::unique_ptr<ExprAST> parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS);
 
-  // 
+  // basic expression
   std::unique_ptr<ExprAST> parseExpression();
 
   // i.e. var i = 3.14
   std::unique_ptr<ExprAST> parseDeclareExpr();
+
+  // while loop
+  std::unique_ptr<ExprAST> parseWhileExpr();
+
+  std::unique_ptr<ExprAST> parseAssignExpr();
+
+  std::unique_ptr<ExprAST> parseIfExpr();
+
+  std::unique_ptr<FunctionAST> parseFunction();
+
+  std::unique_ptr<FunctionAST> parseExtern();
+
+  std::unique_ptr<ExprAST> parseStatement();
 
   int getCurTkPrec();
 };
