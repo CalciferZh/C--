@@ -114,6 +114,8 @@ std::unique_ptr<ExprAST> Parser::parsePrimary()
       return parseIntExpr();
     case tok_real:
       return parseRealExpr();
+    case tok_identifier:
+      return parseIdentifierExpr();
     default:
       return nullptr;
   }
