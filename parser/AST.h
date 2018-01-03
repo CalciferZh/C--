@@ -108,14 +108,16 @@ public:
 
 class DeclareExprAST : public ExprAST {
 public:
-  std::string varName;
+  std::unique_ptr<ExprAST> var;
   
   std::unique_ptr<ExprAST> init;
 
-  DeclareExprAST(std::string varName, std::unique_ptr<ExprAST> init) : varName(std::move(varName)), init(std::move(init)) {}
+  DeclareExprAST(std::unique_ptr<ExprAST> var, std::unique_ptr<ExprAST> init) : var(std::move(var)), init(std::move(init)) {}
 
   void print() override {
-    std::cout << "Declaration: { \n" << "varName: " << varName << "\ninit: {\n";
+    std::cout << "Declaration: { \n" << "var: "; 
+    var->print();
+    std::cout << "\ninit: {\n";
     init->print();
     std::cout << "}\n}\n";
   }

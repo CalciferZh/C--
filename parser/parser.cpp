@@ -85,7 +85,9 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
     std::cout << "return!" << std::endl;
     return nullptr;
   }
-  auto& varTk = tkStream[curIdx];
+
+  auto var = llvm::make_unique<VariableExprAST>(tkStream[curIdx].val);
+
   ++curIdx; // eat var name
   if (tkStream[curIdx].tp != tok_assignOp) {
     return nullptr;
@@ -97,7 +99,7 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
   }
   ++curIdx; // est ';'
 
-  return llvm::make_unique<DeclareExprAST>(varTk.val, std::move(init));
+  return llvm::make_unique<DeclareExprAST>(std::move(var), std::move(init));
 }
 
 std::unique_ptr<ExprAST> Parser::parsePrimary()
