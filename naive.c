@@ -11,7 +11,8 @@ int main(int argc, string argv) {
   int b = a + 2;
   int c = b + a * 3;
   string d = "A long string";
-  double d = 3.1415;
+  double e = 3.1415;
+  int f = max(b, a);
 
   if (a < b)
   {

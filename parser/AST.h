@@ -132,7 +132,7 @@ public:
   void print() override {
     std::cout << "Declaration for " << tp << " : { \n" << "var: "; 
     var->print();
-    std::cout << "init: {\n";
+    std::cout << "}\ninit: {\n";
     init->print();
     std::cout << "}\n}\n";
   }
@@ -196,6 +196,23 @@ public:
     std::cout << "return: {\n";
     retExpr->print();
     std::cout << "}\n";
+  }
+};
+
+class CallExprAST : public ExprAST {
+public:
+  std::string callee;
+
+  std::vector<std::unique_ptr<ExprAST>> params;
+
+  CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> params) : callee(callee), params(std::move(params)) {}
+
+  void print() override {
+    std::cout << "Call: {\n" << "callee: " << callee << "\n}\nparams: {\n";
+    for (const auto& expr: params) {
+      expr->print();
+    }
+    std::cout << "}\n}\n";
   }
 };
 

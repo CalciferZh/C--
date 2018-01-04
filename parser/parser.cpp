@@ -52,6 +52,22 @@ std::vector<std::unique_ptr<ExprAST>> Parser::parseBraceExpr()
   return exprs;
 }
 
+std::vector<std::unique_ptr<ExprAST>> Parser::parseParams()
+{
+  ++curIdx; // eat '('
+  std::vector<std::unique_ptr<ExprAST>> params;
+  while (tkStream[curIdx].tp != tok_rParenthesis)
+  {
+    params.emplace_back(std::move(parseExpression()));
+    if (tkStream[curIdx].tp != tok_comma) {
+      break;
+    }
+    ++curIdx; // eat ','
+  }
+  ++curIdx; // eat ')'
+  return params;
+}
+
 std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr()
 {
   std::cout << "Parsing square bracket expression." << '\n';  
@@ -76,36 +92,34 @@ std::unique_ptr<ExprAST> Parser::parseIdentifierExpr()
     auto offset = parseSqrBrktExpr();
     return llvm::make_unique<VariableExprAST>(name, std::move(offset));
   } else {
-    return llvm::make_unique<VariableExprAST>(name);
+    if (tkStream[curIdx].tp == tok_lParenthesis) {
+      auto params = parseParams();
+      return llvm::make_unique<CallExprAST>(name, std::move(params));
+    } else {
+      return llvm::make_unique<VariableExprAST>(name);
+    }
   }
 }
 
 std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
 {
   std::cout << "Parsing declaration expression." << '\n';
-
   int varTp = tkStream[curIdx].tp;
   ++curIdx; // eat 'var'
-
   if (tkStream[curIdx].tp != tok_identifier) {
     return nullptr;
   }
-
   auto var = llvm::make_unique<VariableExprAST>(tkStream[curIdx].val);
   ++curIdx; // eat var name
-
   if (tkStream[curIdx].tp != tok_assignOp) {
     return nullptr;
   }
   ++curIdx; // eat '='
-
   auto init = parseExpression();
-
   if (tkStream[curIdx].tp != tok_semicolon) {
     return nullptr;
   }
   ++curIdx; // est ';'
-
   return llvm::make_unique<DeclareExprAST>(varTp, std::move(var), std::move(init));
 }
 
@@ -321,8 +335,12 @@ int Parser::getCurTkPrec()
 void Parser::print()
 {
   for (const auto& expr : expressions) {
-    expr->print();
-    std::cout << '\n';
+    if (expr) {
+      expr->print();
+      std::cout << '\n';
+    } else {
+      std::cout << "Unexpected nullptr!" << std::endl;
+    }
   }
   for (const auto& func : functions) {
     func->print();
