@@ -22,6 +22,7 @@ var                   return(tok_var);
 int                   return{tok_intType};
 double                return{tok_doubleType};
 string                return{tok_stringType};
+void                  return(tok_voidType);
 if                    return(tok_if);
 else                  return(tok_else);
 while                 return(tok_while);
@@ -46,5 +47,6 @@ while                 return(tok_while);
 {name}                return(tok_identifier);
 \[                    return(tok_lSquareBracket);
 \]                    return(tok_rSquareBracket);
+\,                    return(tok_comma);
 
 %%

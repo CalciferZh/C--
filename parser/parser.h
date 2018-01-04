@@ -84,6 +84,10 @@ public:
 
   std::unique_ptr<ExprAST> parseIfExpr();
 
+  std::vector<std::unique_ptr<Variable>> parseArguments();
+
+  std::unique_ptr<PrototypeAST> parsePrototype();
+
   std::unique_ptr<FunctionAST> parseFunction();
 
   std::unique_ptr<FunctionAST> parseExtern();

@@ -7,6 +7,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include <string>
+#include <iostream>
 
 class Variable {
 public:
@@ -17,6 +18,10 @@ public:
   llvm::AllocaInst* addr;
 
   Variable(std::string name, int tp, llvm::AllocaInst* addr = nullptr) : name(std::move(name)), tp(tp), addr(addr) {}
+
+  void print() {
+    std::cout << "(" << tp << ")" << name << '\n';
+  }
 };
 
 #endif

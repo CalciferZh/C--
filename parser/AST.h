@@ -190,16 +190,19 @@ class PrototypeAST {
 public:
   std::string name;
 
-  std::vector<std::string> args;
+  std::vector<std::unique_ptr<Variable>> args;
 
-  PrototypeAST(const std::string& name, std::vector<std::string> args) : name(name), args(std::move(args)) {}
+  int retType;
+
+  PrototypeAST(const std::string &name, std::vector<std::unique_ptr<Variable>> args, int retType) : name(name), args(std::move(args)), retType(retType) {}
 
   void print() {
-    // std::cout << "Function prototype: { \n" << "name: " << name << " \nargs:\n";
-    // for (const auto& arg: args) {
-    //   std::cout << arg << ", ";
-    // }
-    // std::cout << "} \n";
+    std::cout << "Function prototype: { \n" << "name: " << name << " \nargs:\n";
+    for (const auto& arg: args) {
+      arg->print();
+    }
+    std::cout << "return type: " << retType << '\n';
+    std::cout << "} \n";
   }
 
   // llvm::Function* codegen();
@@ -210,6 +213,8 @@ public:
   std::unique_ptr<PrototypeAST> proto;
 
   std::vector<std::unique_ptr<ExprAST>> body;
+
+  std::map<std::string, std::unique_ptr<Variable>> varTable;
 
   FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
 

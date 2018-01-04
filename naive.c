@@ -1,16 +1,27 @@
-int a = 1;
-int b = a + 2;
-int c = b + a * 3;
-string d = "A long string";
-double d = 3.1415;
-
-if (a < b) {
-  a = b;
-} else {
-  a = c;
-  b = c;
+void greater(int a, int b) {
+  if (a < b) {
+    a = b;
+  } else {
+    b = a;
+  }
 }
 
-while (a > 0) {
-  a = a - 1;
+int main(int argc, string argv) {
+  int a = 1;
+  int b = a + 2;
+  int c = b + a * 3;
+  string d = "A long string";
+  double d = 3.1415;
+
+  if (a < b)
+  {
+    a = b;
+  } else {
+    a = c;
+    b = c;
+  }
+
+  while (a > 0) {
+    a = a - 1;
+  }
 }
