@@ -12,6 +12,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
+#include "variable.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -120,11 +121,13 @@ public:
 
 class DeclareExprAST : public ExprAST {
 public:
-  std::unique_ptr<ExprAST> var;
-  
+  int tp;
+
+  std::unique_ptr<VariableExprAST> var;
+
   std::unique_ptr<ExprAST> init;
 
-  DeclareExprAST(std::unique_ptr<ExprAST> var, std::unique_ptr<ExprAST> init) : var(std::move(var)), init(std::move(init)) {}
+  DeclareExprAST(int tp, std::unique_ptr<VariableExprAST> var, std::unique_ptr<ExprAST> init) : tp(tp), var(std::move(var)), init(std::move(init)) {}
 
   void print() override {
     std::cout << "Declaration: { \n" << "var: "; 
@@ -192,11 +195,11 @@ public:
   PrototypeAST(const std::string& name, std::vector<std::string> args) : name(name), args(std::move(args)) {}
 
   void print() {
-    std::cout << "Function prototype: { \n" << "name: " << name << " \nargs:\n";
-    for (const auto& arg: args) {
-      std::cout << arg << ", ";
-    }
-    std::cout << "} \n";
+    // std::cout << "Function prototype: { \n" << "name: " << name << " \nargs:\n";
+    // for (const auto& arg: args) {
+    //   std::cout << arg << ", ";
+    // }
+    // std::cout << "} \n";
   }
 
   // llvm::Function* codegen();

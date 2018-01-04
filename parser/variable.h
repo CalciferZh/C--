@@ -11,8 +11,12 @@
 class Variable {
 public:
   std::string name;
+
   int tp;
+
   llvm::AllocaInst* addr;
+
+  Variable(std::string name, int tp, llvm::AllocaInst* addr = nullptr) : name(std::move(name)), tp(tp), addr(addr) {}
 };
 
 #endif

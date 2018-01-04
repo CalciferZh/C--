@@ -83,26 +83,31 @@ std::unique_ptr<ExprAST> Parser::parseIdentifierExpr()
 std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
 {
   std::cout << "Parsing declaration expression." << '\n';
+
+  int varTp = tkStream[curIdx].tp;
   ++curIdx; // eat 'var'
+
+  std::cout << tkStream[curIdx].val << std::endl;
   if (tkStream[curIdx].tp != tok_identifier) {
-    std::cout << "return!" << std::endl;
     return nullptr;
   }
 
   auto var = llvm::make_unique<VariableExprAST>(tkStream[curIdx].val);
-
   ++curIdx; // eat var name
+
   if (tkStream[curIdx].tp != tok_assignOp) {
     return nullptr;
   }
   ++curIdx; // eat '='
+
   auto init = parseExpression();
+
   if (tkStream[curIdx].tp != tok_semicolon) {
     return nullptr;
   }
   ++curIdx; // est ';'
 
-  return llvm::make_unique<DeclareExprAST>(std::move(var), std::move(init));
+  return llvm::make_unique<DeclareExprAST>(varTp, std::move(var), std::move(init));
 }
 
 std::unique_ptr<ExprAST> Parser::parsePrimary()
@@ -163,7 +168,9 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
 {
   std::cout << "Parsing statement.\n";
   switch(tkStream[curIdx].tp) {
-    case tok_var:
+    case tok_intType:
+    case tok_stringType:
+    case tok_doubleType:
       return parseDeclareExpr();
     case tok_identifier:
       return parseAssignExpr();
@@ -227,7 +234,7 @@ std::unique_ptr<FunctionAST> Parser::parseFunction()
 {
   // ++curIdx; // eat 'function'
 
-
+  
 
   return nullptr;
 }
@@ -241,6 +248,7 @@ void Parser::parse()
 {
   curIdx = 0;
   while (curIdx < tkStream.size()) {
+    std::cout << tkStream[curIdx].val << std::endl;
     switch (tkStream[curIdx].tp) {
       case tok_function:
         functions.emplace_back(std::move(parseFunction()));

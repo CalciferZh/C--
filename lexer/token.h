@@ -38,8 +38,11 @@ enum {
   tok_nEqualOp = -24,
   tok_function = -25,
   tok_extern = -26,
+  tok_intType = -27,
+  tok_stringType = -28,
+  tok_doubleType = -29,
 
-  tok_identifier = -27
+  tok_identifier = -30
 };
 
 // Token class
