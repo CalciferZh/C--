@@ -130,9 +130,9 @@ public:
   DeclareExprAST(int tp, std::unique_ptr<VariableExprAST> var, std::unique_ptr<ExprAST> init) : tp(tp), var(std::move(var)), init(std::move(init)) {}
 
   void print() override {
-    std::cout << "Declaration: { \n" << "var: "; 
+    std::cout << "Declaration for " << tp << " : { \n" << "var: "; 
     var->print();
-    std::cout << "\ninit: {\n";
+    std::cout << "init: {\n";
     init->print();
     std::cout << "}\n}\n";
   }

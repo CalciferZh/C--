@@ -248,7 +248,6 @@ void Parser::parse()
 {
   curIdx = 0;
   while (curIdx < tkStream.size()) {
-    std::cout << tkStream[curIdx].val << std::endl;
     switch (tkStream[curIdx].tp) {
       case tok_function:
         functions.emplace_back(std::move(parseFunction()));

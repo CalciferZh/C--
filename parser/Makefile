@@ -1,6 +1,6 @@
 all: parser.o AST.o
 
-parser.o: parser.h parser.cpp
+parser.o: parser.h parser.cpp AST.h AST.cpp
 	g++ -c -std=c++11 parser.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core` -o parser.o
 
 AST.o: AST.h AST.cpp
