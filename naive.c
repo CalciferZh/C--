@@ -1,8 +1,8 @@
-void greater(int a, int b) {
+int max(int a, int b) {
   if (a < b) {
-    a = b;
+    return a;
   } else {
-    b = a;
+    return b;
   }
 }
 
@@ -24,4 +24,6 @@ int main(int argc, string argv) {
   while (a > 0) {
     a = a - 1;
   }
+
+  return 0;
 }

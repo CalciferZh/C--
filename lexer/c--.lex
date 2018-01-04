@@ -26,6 +26,7 @@ void                  return(tok_voidType);
 if                    return(tok_if);
 else                  return(tok_else);
 while                 return(tok_while);
+return                return(tok_return);
 =                     return(tok_assignOp);
 \;                    return(tok_semicolon);
 \(                    return(tok_lParenthesis);

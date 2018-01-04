@@ -186,6 +186,19 @@ public:
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
+class ReturnExprAST : public ExprAST {
+public:
+  std::unique_ptr<ExprAST> retExpr;
+
+  ReturnExprAST(std::unique_ptr<ExprAST> retExpr) : retExpr(std::move(retExpr)) {}
+
+  void print() override {
+    std::cout << "return: {\n";
+    retExpr->print();
+    std::cout << "}\n";
+  }
+};
+
 class PrototypeAST {
 public:
   std::string name;

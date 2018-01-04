@@ -45,7 +45,7 @@ enum {
   tok_return = -31,
   tok_voidType = -32,
 
-  tok_identifier = -33
+  tok_identifier = -34
 };
 
 // Token class

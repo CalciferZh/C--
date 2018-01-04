@@ -92,6 +92,8 @@ public:
 
   std::unique_ptr<FunctionAST> parseExtern();
 
+  std::unique_ptr<ExprAST> parseRetExpr();
+
   std::unique_ptr<ExprAST> parseStatement();
 
   int getCurTkPrec();

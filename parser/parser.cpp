@@ -87,7 +87,6 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
   int varTp = tkStream[curIdx].tp;
   ++curIdx; // eat 'var'
 
-  std::cout << tkStream[curIdx].val << std::endl;
   if (tkStream[curIdx].tp != tok_identifier) {
     return nullptr;
   }
@@ -178,6 +177,8 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
       return parseWhileExpr();
     case tok_if:
       return parseIfExpr();
+    case tok_return:
+      return parseRetExpr();
     default:
       return nullptr;
   }
@@ -228,6 +229,14 @@ std::unique_ptr<ExprAST> Parser::parseWhileExpr()
   auto body = parseBraceExpr();
 
   return llvm::make_unique<WhileExprAST>(std::move(cond), std::move(body));
+}
+
+std::unique_ptr<ExprAST> Parser::parseRetExpr()
+{
+  ++curIdx; // eat 'return'
+  auto expr = std::move(parseExpression());
+  ++curIdx; // eat ';'
+  return llvm::make_unique<ReturnExprAST>(std::move(expr));
 }
 
 std::vector<std::unique_ptr<Variable>> Parser::parseArguments()
