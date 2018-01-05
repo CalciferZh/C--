@@ -262,8 +262,6 @@ public:
 
   std::vector<std::unique_ptr<ExprAST>> body;
 
-  std::map<std::string, std::unique_ptr<Variable>> varTable;
-
   FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
 
   void print() {
