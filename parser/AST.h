@@ -211,6 +211,8 @@ public:
     retExpr->print();
     std::cout << "}\n";
   }
+
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class CallExprAST : public ExprAST {
@@ -228,6 +230,8 @@ public:
     }
     std::cout << "}\n}\n";
   }
+
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class BreakExprAST : public ExprAST {
