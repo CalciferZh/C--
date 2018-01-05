@@ -1,6 +1,26 @@
 #include "AST.h"
 #include "../lexer/token.h"
 
+llvm::Type* getLLVMType(int tok_type) {
+  llvm::Type* type;
+  switch(tok_type) {
+    case tok_intType:
+      type = llvm::Type::getInt32Ty(context);        
+      break;
+    case tok_doubleType:
+      type = llvm::Type::getDoubleTy(context)
+      break;
+    case tok_charType:
+    case toke_stringType:
+      type = llvm::Type::getInt8Ty(context);
+      break;
+    default:
+      type = llvm::Type::getInt32PtrTy(context);
+      break;
+  }
+  return type;
+}
+
 llvm::Value* RealExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: RealExpr\n";
   return llvm::ConstanFP::get(context, llvm::APFloat(val));
@@ -22,8 +42,11 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
     std::cout << "Unknown variable\n";
     return nullptr;
   }
-  // Vica: Need to handle offset
-  return builder.CreateLoad(varTable[name], name.c_str());
+  if (offset == 0){
+    return builder.CreateLoad(varTable[name], name.c_str());
+  } else {
+    // Vica: handle offset
+  }
 }
 
 llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
@@ -72,30 +95,20 @@ llvm::Value* DeclareExprAST(CODEGENPARM) {
     return nullptr;
   } else {
     // Vica: The type should be changed in time
-    llvm::Type* type;
-    switch (tp) {
-      case tok_intType:
-        type = llvm::Type::getInt32Ty(context);        
-        break;
-      case tok_doubleType:
-        type = llvm::Type::getDoubleTy(context)
-        break;
-      case tok_charType:
-      case toke_stringType:
-        type = llvm::Type::getInt8Ty(context);
-        break;
-      default:
-        type = llvm::Type::getInt32PtrTy(context);
-        break;
-    }
-    if (size != 0) {
-      type = llvm::ArrayType::get(type, size);
+    llvm::Type* type = getLLVMType(tp);
+    if (size != nullptr) {
+      auto* sz = llvm::dyn_cast<llvm::ConstantInt>(size->codegen(builder, varTable, context, module));
+      if (sz != nullptr) {
+        auto len = sz->getZExtValue();
+        if (len != 0)
+          type = llvm::ArrayType::get(type, size);
+      }
     }
     varTable[name] = builder.CreateAlloca(type, 0, nullptr, name.c_str());
   }
-  if (var != nullptr) {
+  if (init != nullptr) {
     llvm::Value* L = builder.CreateLoad(varTable[name], name.c_str());
-    llvm::Value* R = var->codegen(builder, varTable, context, module);
+    llvm::Value* R = init->codegen(builder, varTable, context, module);
     if (!L) {
       std::cout << "Error when loading variable\n";
       return nullptr;
@@ -105,31 +118,14 @@ llvm::Value* DeclareExprAST(CODEGENPARM) {
       return nullptr;
     }
     if (offset != 0) {
-      // Vica: init array? 
+      // Vica: how to init an array? 
     } else {
       builder.CreateStore(R, L);
     }
     return R;
-  }
-  /*
-  VariableExprAST *LHSE = dynamic_cast<VariableExprAST*>(var.get());
-  if (!LHSE) {
-    std::cout << "LHS must be a variable\n";
+  } else {
     return nullptr;
   }
-  llvm::Value* R = init->codegen(builder, varTable, context, module);
-  if (!R) {
-    std::cout << "Invalid Expression\n";
-    return nullptr;
-  }
-  llvm::Value* L = varTable[LHSE->getName()];
-  if (!L) {
-    std::cout << "Unknown Variable\n";
-    return nullptr;
-  }
-  builder.CreateStore(R, L);
-  return R;
-  */
 }
 
 llvm::Value* IfExprAST::codegen(CODEGENPARM) {
@@ -149,10 +145,12 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   builder.CreateCondBr(CondV, ThenBB, ElseBB);
   // Emit then value.
   builder.SetInsertPoint(ThenBB);
-  Value* ThenV = then->codegen(builder, varTable, context, module);
-  if (!ThenV) {
-    std::cout << "Error in then\n";
-    return nullptr;
+  for (auto then : ifBody) {
+    Value* ThenV = then->codegen(builder, varTable, context, module);
+    if (!ThenV) {
+      std::cout << "Error in then\n";
+      return nullptr;
+    }
   }
   builder.CreateBr(MergeBB);
   // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
@@ -160,10 +158,12 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   // Emit else block.
   func->getBasicBlockList().push_back(ElseBB);
   builder.SetInsertPoint(ElseBB);
-  Value *ElseV = else->codegen(builder, varTable, context, module);
-  if (!ElseV) {
-    std::cout << "Error in else\n";
-    return nullptr;
+    for (auto elsse : elseBody) {
+    Value *ElseV = elsse->codegen(builder, varTable, context, module);
+    if (!ElseV) {
+      std::cout << "Error in else\n";
+      return nullptr;
+    }
   }
   builder.CreateBr(MergeBB);
   // codegen of 'Else' can change the current block, update ElseBB for the PHI.
@@ -195,10 +195,12 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   CondBB = builder.GetInsertBlock();
   // Emit body value
   builder.SetInsertPoint(BodyBB);
-  llvm::Value* BodyV = body->condegen(builder, varTable, context, module);
-  if (!BodyV) {
-    std::cout << "Error in body\n";
-    return nullptr;
+  for (auto b : body) {
+    llvm::Value* BodyV = b->condegen(builder, varTable, context, module);
+    if (!BodyV) {
+      std::cout << "Error in body\n";
+      return nullptr;
+    }
   }
   builder.CreateBr(CondBB);
   BodyBB = builder.GetInsertBlock();
@@ -206,17 +208,37 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   return builder.SetInsertPoint(FiniBB);
 }
 
+llvm::Value* ReturnExprAST::codegen(CODEGENPARM) {
+  return builder.CreateRet(retExpr->codegen(builder, varTable, context, module););
+}
+
+llvm::Value* CallExprAST::codegen(CODEGENPARM) {
+  // Vica: need to get the func
+  llvm::Function* func = nullptr;
+  return builder.CreateCall(func, params.begin(), params.end(), callee);
+}
+
+llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
+  // Vica: need to know where to jump
+  return nullptr;
+}
+
 llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
   std::cout << "Generating: Prototype\n";
   // Make the function type:  double(double,double) etc.
-  std::vector<llvm::Type *> Doubles(args.size(), llvm::Type::getDoubleTy(context));
-  llvm::FunctionType* FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(context), Doubles, false);
+  std::vector<llvm::Type*> types;
+  for (auto arg : args) {
+    llvm::Type* type = getLLVMType(arg->tp);
+    types.push_back(type);
+  }
+  llvm::Type* ret = getLLVMType(retType);
+  llvm::FunctionType* FT = llvm::FunctionType::get(ret, types, false);
   llvm::Function* F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, name, module.get());
 
   // Set names for all arguments.
   unsigned Idx = 0;
   for (auto &arg : F->args())
-    arg.setName(args[Idx++]);
+    arg.setName(args[Idx++]->name);
 
   return F;
 }
@@ -237,11 +259,22 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   builder.SetInsertPoint(BB);
 
   // Record the function arguments in the NamedValues map.
-  // Vica: I dont know whether should I clear it
+
+  // Vica: I dont know whether should I clear it?
   // varTable.clear();
   for (auto &Arg : func->args())
     varTable[Arg.getName()] = &arg;
 
+  for (auto b : body) {
+    b->codegen(builder, varTable, context, module);
+  }
+  if (llvm::verifyFunction(*func) == false) {
+    return func;
+  } else {
+    func->eraseFromParent();
+    return nullptr;
+  }
+  /*
   if (llvm::Value* retVal = Body->codegen(builder, varTable, context, module)) {
     // Finish off the function.
     Builder.CreateRet(retVal);
@@ -255,4 +288,5 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   // Error reading body, remove function.
   func->eraseFromParent();
   return nullptr;
+  */
 }

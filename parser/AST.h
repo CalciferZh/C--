@@ -241,6 +241,7 @@ public:
   void print() override {
     std::cout << "Break expression.\n";
   }
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class PrototypeAST {
