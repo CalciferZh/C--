@@ -16,6 +16,8 @@ public:
     {tok_assignOp, 2},
     {tok_lessOp, 10},
     {tok_greaterOp, 10},
+    {tok_euqalOp, 10},
+    {tok_nEqualOp, 10},
     {tok_addOp, 20},
     {tok_subtractOp, 20},
     {tok_multiplyOp, 40},
