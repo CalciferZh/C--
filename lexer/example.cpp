@@ -2,8 +2,7 @@
 
 using namespace std;
 
-int main()
-{
+int main() {
   Lexer lexer("../naive.c");
   vector<Token> strm = lexer.analyze();
   for (auto t : strm) {

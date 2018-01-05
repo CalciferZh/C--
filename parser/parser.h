@@ -16,6 +16,8 @@ public:
     {tok_assignOp, 2},
     {tok_lessOp, 10},
     {tok_greaterOp, 10},
+    {tok_euqalOp, 10},
+    {tok_nEqualOp, 10},
     {tok_addOp, 20},
     {tok_subtractOp, 20},
     {tok_multiplyOp, 40},
@@ -74,6 +76,8 @@ public:
   std::unique_ptr<ExprAST> parseAssignExpr();
 
   std::unique_ptr<ExprAST> parseIfExpr();
+
+  std::unique_ptr<ExprAST> parseBreakExpr();
 
   std::vector<std::unique_ptr<ExprAST>> parseParams();
 

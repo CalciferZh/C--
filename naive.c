@@ -6,13 +6,16 @@ int max(int a, int b) {
   }
 }
 
-int main(int argc, string argv) {
+int main(int argc, char argv) {
   int a = 1;
   int b = a + 2;
   int c = b + a * 3;
-  string d = "A long string";
+  char d[32] = "A long string";
   double e = 3.1415;
   int f = max(b, a);
+  int g[100];
+  int h;
+  int i[2] = 1;
 
   if (a < b)
   {

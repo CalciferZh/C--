@@ -2,8 +2,7 @@
 
 using namespace std;
 
-vector<Token> Lexer::analyze()
-{
+vector<Token> Lexer::analyze() {
   int tkType;
   vector<Token> tkStream;
   while ((tkType = worker->yylex()) != 0) {
