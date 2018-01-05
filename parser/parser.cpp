@@ -105,22 +105,26 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
 {
   std::cout << "Parsing declaration expression." << '\n';
   int varTp = tkStream[curIdx].tp;
-  ++curIdx; // eat 'var'
+  ++curIdx; // eat 'int double char or string'
   if (tkStream[curIdx].tp != tok_identifier) {
     return nullptr;
   }
-  auto var = llvm::make_unique<VariableExprAST>(tkStream[curIdx].val);
+  auto name = tkStream[curIdx].val;
   ++curIdx; // eat var name
-  if (tkStream[curIdx].tp != tok_assignOp) {
-    return nullptr;
+  std::unique_ptr<ExprAST> size = nullptr;
+  if (tkStream[curIdx].tp == tok_lSquareBracket) {
+    size = parseSqrBrktExpr();
   }
-  ++curIdx; // eat '='
-  auto init = parseExpression();
+  std::unique_ptr<ExprAST> init = nullptr;
+  if (tkStream[curIdx].tp == tok_assignOp) {
+    ++curIdx; // eat '='
+    init = parseExpression();
+  }
   if (tkStream[curIdx].tp != tok_semicolon) {
     return nullptr;
   }
   ++curIdx; // est ';'
-  return llvm::make_unique<DeclareExprAST>(varTp, std::move(var), std::move(init));
+  return llvm::make_unique<DeclareExprAST>(varTp, std::move(name), std::move(size), std::move(init));
 }
 
 std::unique_ptr<ExprAST> Parser::parsePrimary()

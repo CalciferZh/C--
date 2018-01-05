@@ -13,6 +13,9 @@ int main(int argc, string argv) {
   string d = "A long string";
   double e = 3.1415;
   int f = max(b, a);
+  int g[100];
+  int h;
+  int i[2] = 1;
 
   if (a < b)
   {

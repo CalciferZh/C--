@@ -123,17 +123,28 @@ class DeclareExprAST : public ExprAST {
 public:
   int tp;
 
-  std::unique_ptr<VariableExprAST> var;
+  std::string name;
 
-  std::unique_ptr<ExprAST> init;
+  std::unique_ptr<ExprAST> init = nullptr;
 
-  DeclareExprAST(int tp, std::unique_ptr<VariableExprAST> var, std::unique_ptr<ExprAST> init) : tp(tp), var(std::move(var)), init(std::move(init)) {}
+  std::unique_ptr<ExprAST> size = nullptr;
+
+  DeclareExprAST(int tp, std::string name, std::unique_ptr<ExprAST> size, std::unique_ptr<ExprAST> init) : tp(tp), name(std::move(name)), init(std::move(init)), size(std::move(size)) {}
 
   void print() override {
-    std::cout << "Declaration for " << tp << " : { \n" << "var: "; 
-    var->print();
+    std::cout << "Declaration for " << tp << ": { \n" << "var: " << name;
+    std::cout << "\nsize: {\n";
+    if (size) {
+      size->print();
+    } else {
+      std::cout << 0 << "\n";
+    }
     std::cout << "}\ninit: {\n";
-    init->print();
+    if (init) {
+      init->print();
+    } else {
+      std::cout << "None\n";
+    }
     std::cout << "}\n}\n";
   }
 
