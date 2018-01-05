@@ -132,7 +132,7 @@ public:
   DeclareExprAST(int tp, std::string name, std::unique_ptr<ExprAST> size, std::unique_ptr<ExprAST> init) : tp(tp), name(std::move(name)), init(std::move(init)), size(std::move(size)) {}
 
   void print() override {
-    std::cout << "Declaration for " << tp << ": { \n" << "var: " << name;
+    std::cout << "Declaration for " << tp << ": { \n" << "name: " << name;
     std::cout << "\nsize: {\n";
     if (size) {
       size->print();

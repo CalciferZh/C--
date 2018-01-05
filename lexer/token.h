@@ -44,6 +44,7 @@ enum {
   tok_comma = -30,
   tok_return = -31,
   tok_voidType = -32,
+  tok_charType = -33,
 
   tok_identifier = -34
 };

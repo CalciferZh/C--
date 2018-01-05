@@ -188,6 +188,7 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
     case tok_intType:
     case tok_stringType:
     case tok_doubleType:
+    case tok_charType:
       return parseDeclareExpr();
     case tok_identifier:
       return parseAssignExpr();
@@ -313,6 +314,7 @@ void Parser::parse()
       case tok_doubleType:
       case tok_stringType:
       case tok_voidType:
+      case tok_charType:
         if (tkStream[curIdx+2].tp == tok_lParenthesis) {
           functions.emplace_back(std::move(parseFunction()));
         } else {

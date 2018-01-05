@@ -23,6 +23,7 @@ int                   return{tok_intType};
 double                return{tok_doubleType};
 string                return{tok_stringType};
 void                  return(tok_voidType);
+char                  return(tok_charType);
 if                    return(tok_if);
 else                  return(tok_else);
 while                 return(tok_while);
