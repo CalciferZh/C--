@@ -23,7 +23,7 @@
 #include <vector>
 #include <iostream>
 
-#define CODEGENPARM llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*>& varTable, llvm::LLVMContext& context, std::unique_ptr<llvm::Module> module
+#define CODEGENPARM llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*>& varTable, llvm::LLVMContext& context, std::unique_ptr<llvm::Module>& module
 
 class ExprAST {
 public:
@@ -185,7 +185,7 @@ public:
 
   WhileExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> body) : cond(std::move(cond)), body(std::move(body)) {}
 
-  void print() {
+  void print() override {
     std::cout << "While: {\n" << "condition:\n";
     cond->print();
     std::cout << "body:{\n";
@@ -193,11 +193,9 @@ public:
       expr->print();
     }
     std::cout << "}\n}\n";
-
-    llvm::Value* codegen(CODEGENPARM) override;
   }
 
-  // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
+  llvm::Value* codegen(CODEGENPARM) override;
 };
 
 class ReturnExprAST : public ExprAST {
