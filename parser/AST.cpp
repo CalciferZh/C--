@@ -18,27 +18,9 @@ llvm::Value* StringExprAST(CODEGENPARM) {
 
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: VariableExpr\n";
-  if (varTable.find(name) == varTable.end()) {
+  if (varTable.find(name) != varTable.end()) {
     std::cout << "Unknown variable\n";
-    // Vica: The type should be changed in time
-    llvm::Type* type;
-    switch (tp) {
-      case tok_intType:
-        type = llvm::Type::getInt32Ty(context);        
-        break;
-      case tok_doubleType:
-        type = llvm::Type::getDoubleTy(context)
-        break;
-      case tok_stringType:
-        type = llvm::Type::getInt8Ty(context);
-      default:
-        type = llvm::Type::getInt32PtrTy(context);
-        break;
-    }
-    if (offset != 0) {
-      type = llvm::ArrayType::get(type, offset);
-    }
-    varTable[name] = builder.CreateAlloca(type, 0, nullptr, name.c_str());
+    return nullptr;
   }
   // Vica: Need to handle offset
   return builder.CreateLoad(varTable[name], name.c_str());
@@ -85,18 +67,50 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* DeclareExprAST(CODEGENPARM) {
   std::cout << "Generating: DeclareExpr\n";
-  llvm::Value* L = var->codegen(builder, varTable, context, module);
-  llvm::Value* R = var->codegen(builder, varTable, context, module);
-  if (!L) {
-    std::cout << "Error when create variable\n";
+  if (varTable.find(name) != varTable.end()) {
+    std::cout << "Variable redefinition\n";
     return nullptr;
+  } else {
+    // Vica: The type should be changed in time
+    llvm::Type* type;
+    switch (tp) {
+      case tok_intType:
+        type = llvm::Type::getInt32Ty(context);        
+        break;
+      case tok_doubleType:
+        type = llvm::Type::getDoubleTy(context)
+        break;
+      case tok_charType:
+      case toke_stringType:
+        type = llvm::Type::getInt8Ty(context);
+        break;
+      default:
+        type = llvm::Type::getInt32PtrTy(context);
+        break;
+    }
+    if (size != 0) {
+      type = llvm::ArrayType::get(type, size);
+    }
+    varTable[name] = builder.CreateAlloca(type, 0, nullptr, name.c_str());
   }
-  if (!R) {
-    std::cout << "Invalid expression\n";
-    return nullptr;
+  if (var != nullptr) {
+    llvm::Value* L = builder.CreateLoad(varTable[name], name.c_str());
+    llvm::Value* R = var->codegen(builder, varTable, context, module);
+    if (!L) {
+      std::cout << "Error when loading variable\n";
+      return nullptr;
+    }
+    if (!R) {
+      std::cout << "Invalid expression\n";
+      return nullptr;
+    }
+    if (offset != 0) {
+      // Vica: init array? 
+    } else {
+      builder.CreateStore(R, L);
+    }
+    return R;
   }
-  builder.CreateStore(R, L);
-  return R;
   /*
   VariableExprAST *LHSE = dynamic_cast<VariableExprAST*>(var.get());
   if (!LHSE) {
