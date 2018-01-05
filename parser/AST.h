@@ -12,6 +12,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
+#include "variable.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -119,16 +120,18 @@ public:
 
 class DeclareExprAST : public ExprAST {
 public:
-  std::unique_ptr<ExprAST> var;
-  
+  int tp;
+
+  std::unique_ptr<VariableExprAST> var;
+
   std::unique_ptr<ExprAST> init;
 
-  DeclareExprAST(std::unique_ptr<ExprAST> var, std::unique_ptr<ExprAST> init) : var(std::move(var)), init(std::move(init)) {}
+  DeclareExprAST(int tp, std::unique_ptr<VariableExprAST> var, std::unique_ptr<ExprAST> init) : tp(tp), var(std::move(var)), init(std::move(init)) {}
 
   void print() override {
-    std::cout << "Declaration: { \n" << "var: "; 
+    std::cout << "Declaration for " << tp << " : { \n" << "var: "; 
     var->print();
-    std::cout << "\ninit: {\n";
+    std::cout << "}\ninit: {\n";
     init->print();
     std::cout << "}\n}\n";
   }
@@ -186,19 +189,52 @@ public:
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
+class ReturnExprAST : public ExprAST {
+public:
+  std::unique_ptr<ExprAST> retExpr;
+
+  ReturnExprAST(std::unique_ptr<ExprAST> retExpr) : retExpr(std::move(retExpr)) {}
+
+  void print() override {
+    std::cout << "return: {\n";
+    retExpr->print();
+    std::cout << "}\n";
+  }
+};
+
+class CallExprAST : public ExprAST {
+public:
+  std::string callee;
+
+  std::vector<std::unique_ptr<ExprAST>> params;
+
+  CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> params) : callee(callee), params(std::move(params)) {}
+
+  void print() override {
+    std::cout << "Call: {\n" << "callee: " << callee << "\n}\nparams: {\n";
+    for (const auto& expr: params) {
+      expr->print();
+    }
+    std::cout << "}\n}\n";
+  }
+};
+
 class PrototypeAST {
 public:
   std::string name;
 
-  std::vector<std::string> args;
+  std::vector<std::unique_ptr<Variable>> args;
 
-  PrototypeAST(const std::string& name, std::vector<std::string> args) : name(name), args(std::move(args)) {}
+  int retType;
+
+  PrototypeAST(const std::string &name, std::vector<std::unique_ptr<Variable>> args, int retType) : name(name), args(std::move(args)), retType(retType) {}
 
   void print() {
     std::cout << "Function prototype: { \n" << "name: " << name << " \nargs:\n";
     for (const auto& arg: args) {
-      std::cout << arg << ", ";
+      arg->print();
     }
+    std::cout << "return type: " << retType << '\n';
     std::cout << "} \n";
   }
 
@@ -210,6 +246,8 @@ public:
   std::unique_ptr<PrototypeAST> proto;
 
   std::vector<std::unique_ptr<ExprAST>> body;
+
+  std::map<std::string, std::unique_ptr<Variable>> varTable;
 
   FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
 

@@ -52,6 +52,22 @@ std::vector<std::unique_ptr<ExprAST>> Parser::parseBraceExpr()
   return exprs;
 }
 
+std::vector<std::unique_ptr<ExprAST>> Parser::parseParams()
+{
+  ++curIdx; // eat '('
+  std::vector<std::unique_ptr<ExprAST>> params;
+  while (tkStream[curIdx].tp != tok_rParenthesis)
+  {
+    params.emplace_back(std::move(parseExpression()));
+    if (tkStream[curIdx].tp != tok_comma) {
+      break;
+    }
+    ++curIdx; // eat ','
+  }
+  ++curIdx; // eat ')'
+  return params;
+}
+
 std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr()
 {
   std::cout << "Parsing square bracket expression." << '\n';  
@@ -76,21 +92,24 @@ std::unique_ptr<ExprAST> Parser::parseIdentifierExpr()
     auto offset = parseSqrBrktExpr();
     return llvm::make_unique<VariableExprAST>(name, std::move(offset));
   } else {
-    return llvm::make_unique<VariableExprAST>(name);
+    if (tkStream[curIdx].tp == tok_lParenthesis) {
+      auto params = parseParams();
+      return llvm::make_unique<CallExprAST>(name, std::move(params));
+    } else {
+      return llvm::make_unique<VariableExprAST>(name);
+    }
   }
 }
 
 std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
 {
   std::cout << "Parsing declaration expression." << '\n';
+  int varTp = tkStream[curIdx].tp;
   ++curIdx; // eat 'var'
   if (tkStream[curIdx].tp != tok_identifier) {
-    std::cout << "return!" << std::endl;
     return nullptr;
   }
-
   auto var = llvm::make_unique<VariableExprAST>(tkStream[curIdx].val);
-
   ++curIdx; // eat var name
   if (tkStream[curIdx].tp != tok_assignOp) {
     return nullptr;
@@ -101,8 +120,7 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
     return nullptr;
   }
   ++curIdx; // est ';'
-
-  return llvm::make_unique<DeclareExprAST>(std::move(var), std::move(init));
+  return llvm::make_unique<DeclareExprAST>(varTp, std::move(var), std::move(init));
 }
 
 std::unique_ptr<ExprAST> Parser::parsePrimary()
@@ -163,7 +181,9 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
 {
   std::cout << "Parsing statement.\n";
   switch(tkStream[curIdx].tp) {
-    case tok_var:
+    case tok_intType:
+    case tok_stringType:
+    case tok_doubleType:
       return parseDeclareExpr();
     case tok_identifier:
       return parseAssignExpr();
@@ -171,6 +191,8 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
       return parseWhileExpr();
     case tok_if:
       return parseIfExpr();
+    case tok_return:
+      return parseRetExpr();
     default:
       return nullptr;
   }
@@ -223,13 +245,51 @@ std::unique_ptr<ExprAST> Parser::parseWhileExpr()
   return llvm::make_unique<WhileExprAST>(std::move(cond), std::move(body));
 }
 
+std::unique_ptr<ExprAST> Parser::parseRetExpr()
+{
+  ++curIdx; // eat 'return'
+  auto expr = std::move(parseExpression());
+  ++curIdx; // eat ';'
+  return llvm::make_unique<ReturnExprAST>(std::move(expr));
+}
+
+std::vector<std::unique_ptr<Variable>> Parser::parseArguments()
+{
+  ++curIdx; // eat '('
+  std::vector<std::unique_ptr<Variable>> args;
+  while (tkStream[curIdx].tp != tok_rParenthesis) {
+    args.emplace_back(llvm::make_unique<Variable>(tkStream[curIdx+1].val, tkStream[curIdx].tp));
+    curIdx += 2;
+    if (tkStream[curIdx].tp != tok_comma) {
+      break;
+    }
+    ++curIdx; // eat ','
+  }
+  ++curIdx; // eat ')'
+  return args;
+}
+
+std::unique_ptr<PrototypeAST> Parser::parsePrototype()
+{
+  int retType = tkStream[curIdx].tp;
+  ++curIdx; // eat return type
+
+  if (tkStream[curIdx].tp != tok_identifier) {
+    return nullptr;
+  }
+  auto name = tkStream[curIdx].val;
+  ++curIdx; // eat identifier
+
+  auto args = parseArguments();
+
+  return llvm::make_unique<PrototypeAST>(std::move(name), std::move(args), retType);
+}
+
 std::unique_ptr<FunctionAST> Parser::parseFunction()
 {
-  // ++curIdx; // eat 'function'
-
-
-
-  return nullptr;
+  auto proto = parsePrototype();
+  auto body = parseBraceExpr();
+  return llvm::make_unique<FunctionAST>(std::move(proto), std::move(body));
 }
 
 std::unique_ptr<FunctionAST> Parser::parseExtern()
@@ -242,11 +302,18 @@ void Parser::parse()
   curIdx = 0;
   while (curIdx < tkStream.size()) {
     switch (tkStream[curIdx].tp) {
-      case tok_function:
-        functions.emplace_back(std::move(parseFunction()));
-        break;
       case tok_extern:
         functions.emplace_back(std::move(parseExtern()));
+        break;
+      case tok_intType:
+      case tok_doubleType:
+      case tok_stringType:
+      case tok_voidType:
+        if (tkStream[curIdx+2].tp == tok_lParenthesis) {
+          functions.emplace_back(std::move(parseFunction()));
+        } else {
+          expressions.emplace_back(std::move(parseStatement()));
+        }
         break;
       default:
         expressions.emplace_back(std::move(parseStatement()));
@@ -268,8 +335,12 @@ int Parser::getCurTkPrec()
 void Parser::print()
 {
   for (const auto& expr : expressions) {
-    expr->print();
-    std::cout << '\n';
+    if (expr) {
+      expr->print();
+      std::cout << '\n';
+    } else {
+      std::cout << "Unexpected nullptr!" << std::endl;
+    }
   }
   for (const auto& func : functions) {
     func->print();
