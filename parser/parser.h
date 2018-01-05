@@ -40,7 +40,8 @@ public:
 
   size_t curIdx;
 
-  Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)), builder(llvm::IRBuilder<>(context)) {}
+  Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)), builder(llvm::IRBuilder<>(context)),
+    module(llvm::make_unique<llvm::Module>("gg myfriend", context)) {}
 
   void parse();
 

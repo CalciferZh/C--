@@ -97,7 +97,6 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
     std::cout << "Variable redefinition\n";
     return nullptr;
   } else {
-    // Vica: The type should be changed in time
     llvm::Type* type = getLLVMType(tp, context);
     if (size != nullptr) {
       auto* sz = llvm::dyn_cast<llvm::ConstantInt>(size->codegen(builder, varTable, context, module));
@@ -149,7 +148,7 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* IfExprAST::codegen(CODEGENPARM) {
-  // Vica: they are vector
+  std::cout << "Generating: IfExpr\n";
   llvm::Value* CondV = cond->codegen(builder, varTable, context, module);
   if (!CondV) {
     std::cout << "Error in condition\n";
@@ -210,6 +209,7 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
+  std::cout << "Generating: WhileExpr\n";
   llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "cond");
   llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "body");
   llvm::BasicBlock* FiniBB = llvm::BasicBlock::Create(context, "finish");
@@ -241,10 +241,12 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* ReturnExprAST::codegen(CODEGENPARM) {
+  std::cout << "Generating: ReturnExpr\n";
   return builder.CreateRet(retExpr->codegen(builder, varTable, context, module));
 }
 
 llvm::Value* CallExprAST::codegen(CODEGENPARM) {
+  std::cout << "Generating: CallExpr\n";
   // Vica: need to get the func
   llvm::Function* func = nullptr;
   std::vector<llvm::Value*> Params;
@@ -256,6 +258,7 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
+  std::cout << "Generating: BreakExpr\n";
   // Vica: need to know where to jump
   return nullptr;
 }
