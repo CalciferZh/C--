@@ -21,7 +21,24 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   if (varTable.find(name) == varTable.end()) {
     std::cout << "Unknown variable\n";
     // Vica: The type should be changed in time
-    varTable[name] = builder.CreateAlloca(llvm::Type::getInt32Ty(context), 0, nullptr, name.c_str());
+    llvm::Type* type;
+    switch (tp) {
+      case tok_intType:
+        type = llvm::Type::getInt32Ty(context);        
+        break;
+      case tok_doubleType:
+        type = llvm::Type::getDoubleTy(context)
+        break;
+      case tok_stringType:
+        type = llvm::Type::getInt8Ty(context);
+      default:
+        type = llvm::Type::getInt32PtrTy(context);
+        break;
+    }
+    if (offset != 0) {
+      type = llvm::ArrayType::get(type, offset);
+    }
+    varTable[name] = builder.CreateAlloca(type, 0, nullptr, name.c_str());
   }
   // Vica: Need to handle offset
   return builder.CreateLoad(varTable[name], name.c_str());
