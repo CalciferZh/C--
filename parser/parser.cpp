@@ -290,7 +290,14 @@ std::unique_ptr<FunctionAST> Parser::parseFunction() {
 }
 
 std::unique_ptr<FunctionAST> Parser::parseExtern() {
-  return nullptr;
+  ++curIdx; // eat 'extern'
+  auto proto = parsePrototype();
+  if (tkStream[curIdx].tp != tok_semicolon) {
+    return nullptr;
+  }
+  ++curIdx; // eat ';'
+  std::vector<std::unique_ptr<ExprAST>> body;
+  return llvm::make_unique<FunctionAST>(std::move(proto), std::move(body));
 }
 
 void Parser::parse() {
@@ -328,14 +335,7 @@ int Parser::getCurTkPrec() {
 }
 
 void Parser::print() {
-  for (const auto& expr : expressions) {
-    if (expr) {
-      expr->print();
-      std::cout << '\n';
-    } else {
-      std::cout << "Unexpected nullptr!" << std::endl;
-    }
-  }
+  std::cout << "========================= functions ==============================\n";
   for (const auto& func : functions) {
     func->print();
     std::cout << '\n';
