@@ -225,6 +225,15 @@ public:
   }
 };
 
+class BreakExprAST : public ExprAST {
+public:
+  BreakExprAST() = default;
+
+  void print() override {
+    std::cout << "Break expression.\n";
+  }
+};
+
 class PrototypeAST {
 public:
   std::string name;

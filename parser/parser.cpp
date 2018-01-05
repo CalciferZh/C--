@@ -169,6 +169,15 @@ std::unique_ptr<ExprAST> Parser::parseExpression() {
   return parseBinOpRHS(0, std::move(LHS));
 }
 
+std::unique_ptr<ExprAST> Parser::parseBreakExpr() {
+  ++curIdx; // eat break
+  if (tkStream[curIdx].tp != tok_semicolon) {
+    return nullptr;
+  }
+  ++curIdx; // eat ';'
+  return llvm::make_unique<BreakExprAST>();
+}
+
 std::unique_ptr<ExprAST> Parser::parseStatement() {
   std::cout << "Parsing statement.\n";
   switch(tkStream[curIdx].tp) {
@@ -185,6 +194,8 @@ std::unique_ptr<ExprAST> Parser::parseStatement() {
       return parseIfExpr();
     case tok_return:
       return parseRetExpr();
+    case tok_break:
+      return parseBreakExpr();
     default:
       return nullptr;
   }

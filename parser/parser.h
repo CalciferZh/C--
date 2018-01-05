@@ -77,6 +77,8 @@ public:
 
   std::unique_ptr<ExprAST> parseIfExpr();
 
+  std::unique_ptr<ExprAST> parseBreakExpr();
+
   std::vector<std::unique_ptr<ExprAST>> parseParams();
 
   std::vector<std::unique_ptr<Variable>> parseArguments();

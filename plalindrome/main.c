@@ -6,6 +6,7 @@ int main() {
   while (i < len) {
     if (str[i] != str[len - i - 1]) {
       flag = 1;
+      break;
     }
     i = i + 1;
   }

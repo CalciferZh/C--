@@ -28,6 +28,7 @@ if                    return(tok_if);
 else                  return(tok_else);
 while                 return(tok_while);
 return                return(tok_return);
+break                 return(tok_break);
 =                     return(tok_assignOp);
 \;                    return(tok_semicolon);
 \(                    return(tok_lParenthesis);
