@@ -3,15 +3,11 @@ int main() {
   int i = 0;
   int len = 32;
   int flag = 0;
-  while (i < len)
-  {
-    i = i + 1;
-    if (str[i] )
-    {
+  while (i < len) {
+    if (str[i] != str[len - i - 1]) {
       flag = 1;
-    } else {
-      
     }
+    i = i + 1;
   }
   return 0;
 }

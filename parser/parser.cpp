@@ -230,12 +230,13 @@ std::unique_ptr<ExprAST> Parser::parseIfExpr()
 
   auto ifBody = parseBraceExpr();
 
-  if (tkStream[curIdx].tp != tok_else) {
-    return nullptr;
-  }
-  ++curIdx; // eat 'else'
+  std::vector<std::unique_ptr<ExprAST>> elseBody;
 
-  auto elseBody = parseBraceExpr();
+  if (tkStream[curIdx].tp == tok_else) {
+    ++curIdx; // eat 'else'
+    elseBody = std::move(parseBraceExpr());
+  }
+
   return llvm::make_unique<IfExprAST>(std::move(cond), std::move(ifBody), std::move(elseBody));
 }
 
