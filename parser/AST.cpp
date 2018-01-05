@@ -44,10 +44,10 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
     return nullptr;
   }
   if (offset == nullptr){
-    return builder.CreateLoad(varTable[name], name.c_str());
+    return builder.CreateLoad(varTable[name]->addr, name.c_str());
   } else {
     llvm::Value* len = offset->codegen(builder, varTable, context, module);
-    return builder.CreateInBoundsGEP(varTable[name], len);
+    return builder.CreateInBoundsGEP(varTable[name]->addr, len);
   }
 }
 
@@ -107,10 +107,11 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
           type = llvm::ArrayType::get(type, len);
       }
     }
-    varTable[name] = builder.CreateAlloca(type, 0, nullptr, name.c_str());
+    llvm::AllocaInst* addr = builder.CreateAlloca(type, 0, nullptr, name.c_str());
+    varTable[name] = std::unique_ptr<Variable>(new Variable(name, tp, addr));
   }
   if (init) {
-    llvm::Value* L = builder.CreateLoad(varTable[name], name.c_str());
+    llvm::Value* L = builder.CreateLoad(varTable[name]->addr, name.c_str());
     llvm::Value* R = init->codegen(builder, varTable, context, module);
     if (!L) {
       std::cout << "Error when loading variable\n";

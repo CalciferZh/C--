@@ -23,7 +23,7 @@
 #include <vector>
 #include <iostream>
 
-#define CODEGENPARM llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*>& varTable, llvm::LLVMContext& context, std::unique_ptr<llvm::Module>& module
+#define CODEGENPARM llvm::IRBuilder<>& builder, std::map<std::string, std::unique_ptr<Variable>>& varTable, llvm::LLVMContext& context, std::unique_ptr<llvm::Module>& module
 
 class ExprAST {
 public:
