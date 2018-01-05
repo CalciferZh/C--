@@ -46,8 +46,7 @@ public:
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
-class IntExprAST : public ExprAST
-{
+class IntExprAST : public ExprAST {
 public:
   int val;
 
@@ -60,8 +59,7 @@ public:
   // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
-class StringExprAST : public ExprAST
-{
+class StringExprAST : public ExprAST {
 public:
   std::string val;
 

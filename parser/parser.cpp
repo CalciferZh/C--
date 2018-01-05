@@ -1,31 +1,27 @@
 #include "parser.h"
 
-std::unique_ptr<ExprAST> Parser::parseIntExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseIntExpr() {
   std::cout << "Parsing int expression." << '\n';
   auto result = llvm::make_unique<IntExprAST>(std::stoi(tkStream[curIdx].val));
   ++curIdx;
   return std::move(result);
 }
 
-std::unique_ptr<ExprAST> Parser::parseRealExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseRealExpr() {
   std::cout << "Parsing real expresion." << '\n';
   auto result = llvm::make_unique<RealExprAST>(std::stoi(tkStream[curIdx].val));
   ++curIdx;
   return std::move(result);
 }
 
-std::unique_ptr<ExprAST> Parser::parseStringExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseStringExpr() {
   std::cout << "Parsing string expression." << '\n';
   auto result = llvm::make_unique<StringExprAST>(tkStream[curIdx].val);
   ++curIdx;
   return std::move(result);
 }
 
-std::unique_ptr<ExprAST> Parser::parseParenExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseParenExpr() {
   std::cout << "Parsing parenthesis expression." << '\n';
   ++curIdx; // eat '('
   auto inner = parseExpression();
@@ -36,8 +32,7 @@ std::unique_ptr<ExprAST> Parser::parseParenExpr()
   return inner;
 }
 
-std::vector<std::unique_ptr<ExprAST>> Parser::parseBraceExpr()
-{
+std::vector<std::unique_ptr<ExprAST>> Parser::parseBraceExpr() {
   std::cout << "Parsing brace expression." << '\n';
   ++curIdx; // eat '{'
 
@@ -52,8 +47,7 @@ std::vector<std::unique_ptr<ExprAST>> Parser::parseBraceExpr()
   return exprs;
 }
 
-std::vector<std::unique_ptr<ExprAST>> Parser::parseParams()
-{
+std::vector<std::unique_ptr<ExprAST>> Parser::parseParams() {
   ++curIdx; // eat '('
   std::vector<std::unique_ptr<ExprAST>> params;
   while (tkStream[curIdx].tp != tok_rParenthesis)
@@ -68,8 +62,7 @@ std::vector<std::unique_ptr<ExprAST>> Parser::parseParams()
   return params;
 }
 
-std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr() {
   std::cout << "Parsing square bracket expression." << '\n';  
   ++curIdx; // eat '['
   auto inner = parseExpression();
@@ -83,8 +76,7 @@ std::unique_ptr<ExprAST> Parser::parseSqrBrktExpr()
   return inner;
 }
 
-std::unique_ptr<ExprAST> Parser::parseIdentifierExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseIdentifierExpr() {
   std::cout << "Parsing identifier expression." << '\n';
   auto name = tkStream[curIdx].val;
   ++curIdx; // eat identifier
@@ -101,8 +93,7 @@ std::unique_ptr<ExprAST> Parser::parseIdentifierExpr()
   }
 }
 
-std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseDeclareExpr() {
   std::cout << "Parsing declaration expression." << '\n';
   int varTp = tkStream[curIdx].tp;
   ++curIdx; // eat 'int double char or string'
@@ -127,8 +118,7 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr()
   return llvm::make_unique<DeclareExprAST>(varTp, std::move(name), std::move(size), std::move(init));
 }
 
-std::unique_ptr<ExprAST> Parser::parsePrimary()
-{
+std::unique_ptr<ExprAST> Parser::parsePrimary() {
   std::cout << "Parsing primary expression." << '\n';
   switch (tkStream[curIdx].tp) {
     case tok_lParenthesis:
@@ -146,8 +136,7 @@ std::unique_ptr<ExprAST> Parser::parsePrimary()
   }
 }
 
-std::unique_ptr<ExprAST> Parser::parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS)
-{
+std::unique_ptr<ExprAST> Parser::parseBinOpRHS(int prec, std::unique_ptr<ExprAST> LHS) {
   while (true) {
     std::cout << "Parsing binary operator RHS expression." << '\n';
     auto& tkOp = tkStream[curIdx];
@@ -171,8 +160,7 @@ std::unique_ptr<ExprAST> Parser::parseBinOpRHS(int prec, std::unique_ptr<ExprAST
   }
 }
 
-std::unique_ptr<ExprAST> Parser::parseExpression()
-{
+std::unique_ptr<ExprAST> Parser::parseExpression() {
   std::cout << "Parsing expression." << '\n';
   auto LHS = parsePrimary();
   if (!LHS) {
@@ -181,8 +169,7 @@ std::unique_ptr<ExprAST> Parser::parseExpression()
   return parseBinOpRHS(0, std::move(LHS));
 }
 
-std::unique_ptr<ExprAST> Parser::parseStatement()
-{
+std::unique_ptr<ExprAST> Parser::parseStatement() {
   std::cout << "Parsing statement.\n";
   switch(tkStream[curIdx].tp) {
     case tok_intType:
@@ -203,8 +190,7 @@ std::unique_ptr<ExprAST> Parser::parseStatement()
   }
 }
 
-std::unique_ptr<ExprAST> Parser::parseAssignExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseAssignExpr() {
   auto var = parseIdentifierExpr();
 
   if (tkStream[curIdx].tp != tok_assignOp) {
@@ -222,8 +208,7 @@ std::unique_ptr<ExprAST> Parser::parseAssignExpr()
   return llvm::make_unique<BinaryExprAST>(tok_assignOp, std::move(var), std::move(expr));
 }
 
-std::unique_ptr<ExprAST> Parser::parseIfExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseIfExpr() {
   ++curIdx; // eat 'if'
 
   auto cond = std::move(parseParenExpr());
@@ -240,8 +225,7 @@ std::unique_ptr<ExprAST> Parser::parseIfExpr()
   return llvm::make_unique<IfExprAST>(std::move(cond), std::move(ifBody), std::move(elseBody));
 }
 
-std::unique_ptr<ExprAST> Parser::parseWhileExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseWhileExpr() {
   ++curIdx; // eat while
 
   auto cond = std::move(parseParenExpr());
@@ -251,16 +235,14 @@ std::unique_ptr<ExprAST> Parser::parseWhileExpr()
   return llvm::make_unique<WhileExprAST>(std::move(cond), std::move(body));
 }
 
-std::unique_ptr<ExprAST> Parser::parseRetExpr()
-{
+std::unique_ptr<ExprAST> Parser::parseRetExpr() {
   ++curIdx; // eat 'return'
   auto expr = std::move(parseExpression());
   ++curIdx; // eat ';'
   return llvm::make_unique<ReturnExprAST>(std::move(expr));
 }
 
-std::vector<std::unique_ptr<Variable>> Parser::parseArguments()
-{
+std::vector<std::unique_ptr<Variable>> Parser::parseArguments() {
   ++curIdx; // eat '('
   std::vector<std::unique_ptr<Variable>> args;
   while (tkStream[curIdx].tp != tok_rParenthesis) {
@@ -275,8 +257,7 @@ std::vector<std::unique_ptr<Variable>> Parser::parseArguments()
   return args;
 }
 
-std::unique_ptr<PrototypeAST> Parser::parsePrototype()
-{
+std::unique_ptr<PrototypeAST> Parser::parsePrototype() {
   int retType = tkStream[curIdx].tp;
   ++curIdx; // eat return type
 
@@ -291,20 +272,17 @@ std::unique_ptr<PrototypeAST> Parser::parsePrototype()
   return llvm::make_unique<PrototypeAST>(std::move(name), std::move(args), retType);
 }
 
-std::unique_ptr<FunctionAST> Parser::parseFunction()
-{
+std::unique_ptr<FunctionAST> Parser::parseFunction() {
   auto proto = parsePrototype();
   auto body = parseBraceExpr();
   return llvm::make_unique<FunctionAST>(std::move(proto), std::move(body));
 }
 
-std::unique_ptr<FunctionAST> Parser::parseExtern()
-{
+std::unique_ptr<FunctionAST> Parser::parseExtern() {
   return nullptr;
 }
 
-void Parser::parse()
-{
+void Parser::parse() {
   curIdx = 0;
   while (curIdx < tkStream.size()) {
     switch (tkStream[curIdx].tp) {
@@ -329,8 +307,7 @@ void Parser::parse()
   }
 }
 
-int Parser::getCurTkPrec()
-{
+int Parser::getCurTkPrec() {
   auto prec = precTable.find(tkStream[curIdx].tp);
   if (prec != precTable.end()) {
     return prec->second;
@@ -339,8 +316,7 @@ int Parser::getCurTkPrec()
   }
 }
 
-void Parser::print()
-{
+void Parser::print() {
   for (const auto& expr : expressions) {
     if (expr) {
       expr->print();

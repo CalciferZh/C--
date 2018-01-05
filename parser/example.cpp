@@ -3,8 +3,7 @@
 
 using namespace std;
 
-int main()
-{
+int main() {
   Lexer lexer("../plalindrome/main.c");
   vector<Token> strm = lexer.analyze();
   Parser parser(strm);
