@@ -3,11 +3,12 @@
 using namespace std;
 
 int main() {
-  Lexer lexer("../naive.c");
+  Lexer lexer("../plalindrome/main.c");
   vector<Token> strm = lexer.analyze();
   for (auto t : strm) {
     std::cout << "TYPE: " << t.tp
-              << " VALUE: " << t.val << '\n';
+              << "\tVALUE: " << t.val
+              << "\tLINENO: " << t.lineNo << '\n';
   }
   return 0;
 }

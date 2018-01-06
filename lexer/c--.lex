@@ -1,4 +1,5 @@
 %option noyywrap
+%option yylineno
 %{
 #include "token.h"
 %}
@@ -18,6 +19,7 @@ number  {num1}|{num2}
 %%
 
 {ws}                  /* skip blanks and tabs */
+"//".*                  /* skip comments */
 var                   return(tok_var);
 int                   return{tok_intType};
 double                return{tok_doubleType};

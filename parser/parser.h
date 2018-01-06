@@ -6,6 +6,7 @@
 #include "./function.h"
 #include "../lexer/lexer.h"
 #include "../lexer/token.h"
+#include "./exception.h"
 #include <utility>
 
 class Parser {
@@ -79,6 +80,8 @@ public:
   std::unique_ptr<ExprAST> parseIfExpr();
 
   std::unique_ptr<ExprAST> parseBreakExpr();
+
+  std::unique_ptr<ExprAST> parseSingleExpr(); // parse expressions as a single statement, i.e. a = max(b,c);
 
   std::vector<std::unique_ptr<ExprAST>> parseParams();
 

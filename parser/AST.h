@@ -144,13 +144,9 @@ public:
 
   void print() override {
     std::cout << "Declaration for " << tp << ": { \n" << "name: " << name;
-    std::cout << "\nsize: {\n";
-    if (size) {
-      std::cout << size;
-    } else {
-      std::cout << 0 << "\n";
-    }
-    std::cout << "}\ninit: {\n";
+    std::cout << "\nsize: ";
+    std::cout << size;
+    std::cout << "\ninit: {\n";
     if (init) {
       init->print();
     } else {
