@@ -32,6 +32,8 @@ public:
   virtual void print() = 0;
 
   virtual llvm::Value* codegen(CODEGENPARM) = 0;
+
+  virtual int getClassType() = 0;
 };
 
 class RealExprAST : public ExprAST {
@@ -45,6 +47,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 1; }
 };
 
 class IntExprAST : public ExprAST {
@@ -58,6 +62,8 @@ public:
   }
 
   llvm::Value *codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 2; }
 };
 
 class StringExprAST : public ExprAST {
@@ -71,6 +77,8 @@ public:
   }
 
   llvm::Value *codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 3; }
 };
 
 class VariableExprAST : public ExprAST {
@@ -94,6 +102,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 4; }
 };
 
 class BinaryExprAST : public ExprAST {
@@ -116,6 +126,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 5; }
 };
 
 class DeclareExprAST : public ExprAST {
@@ -134,7 +146,7 @@ public:
     std::cout << "Declaration for " << tp << ": { \n" << "name: " << name;
     std::cout << "\nsize: {\n";
     if (size) {
-      size->print();
+      std::cout << size;
     } else {
       std::cout << 0 << "\n";
     }
@@ -148,6 +160,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 6; }
 };
 
 class IfExprAST : public ExprAST {
@@ -175,6 +189,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 7; }
 };
 
 class WhileExprAST : public ExprAST {
@@ -196,6 +212,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 8; }
 };
 
 class ReturnExprAST : public ExprAST {
@@ -211,6 +229,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 9; }
 };
 
 class CallExprAST : public ExprAST {
@@ -230,6 +250,8 @@ public:
   }
 
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 10; }
 };
 
 class BreakExprAST : public ExprAST {
@@ -240,6 +262,8 @@ public:
     std::cout << "Break expression.\n";
   }
   llvm::Value* codegen(CODEGENPARM) override;
+
+  int getClassType() override { return 11; }
 };
 
 class PrototypeAST {

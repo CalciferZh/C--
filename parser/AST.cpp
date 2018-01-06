@@ -97,7 +97,7 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
       std::cout << "Negative size\n";
       return nullptr;
     }
-    if (size != 0)
+    if (size != 0) {
       type = llvm::ArrayType::get(type, size);
     }
     llvm::AllocaInst* addr = builder.CreateAlloca(type, 0, nullptr, name.c_str());
@@ -110,16 +110,16 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
       std::cout << "Error when loading variable\n";
       return nullptr;
     }
-    if (!R && tp != tok_charType) {
+    if (!R && init->getClassType() != 3) { // R==nullptr is acceptable only if stringexpr
       std::cout << "Invalid expression\n";
       return nullptr;
     }
-    if (len != 0) {
-      if (tp == tok_stringType) {
+    if (size != 0) {
+      if (init->getClassType() == 3) {
         // Vica: Both dynamic_cast and llvm::dyn_cast fail.. wtf
         StringExprAST* str = static_cast<StringExprAST*>(init.get());
         if (str) {
-          if (len < str->val.length()) {
+          if (unsigned(size) < str->val.length()) {
             std::cout << "Too long\n";
             return nullptr;
           }
@@ -223,7 +223,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   for (auto& b : body) {
     llvm::Value* BodyV = b->codegen(builder, varTable, context, module);
     if (!BodyV) {
-      if (auto breakPtr = llvm::dyncast<BreakExprAST*>(b)) {
+      if (b->getClassType() == 11) {
         builder.CreateBr(FiniBB);
       } else {
         std::cout << "Error in body\n";
