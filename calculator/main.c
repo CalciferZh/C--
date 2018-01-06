@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
+extern void printd(double val);
+// #include <stdio.h>
 
 int isOp(char ch) {
   if (ch == '+') {
@@ -35,16 +35,16 @@ int main() {
   int exprStackIdx = 0;
 
   // final result
-  int numStack[128];
+  double numStack[128];
   int numStackHead = 0;
 
   int opStack[128];
   int opStackHead = 0;
 
   int tmpSymbol;
-  int lhs = 0;
-  int rhs = 0;
-  int res = 0;
+  double lhs = 0;
+  double rhs = 0;
+  double res = 0;
 
   int i;
 
@@ -116,11 +116,12 @@ int main() {
       numStackHead = numStackHead + 1;
     } else {
       numStack[numStackHead] = exprStack[exprStackIdx];
-      numStackHead += 1;
+      numStackHead = numStackHead + 1;
     }
-    exprStackIdx += 1;
+    exprStackIdx = exprStackIdx + 1;
   }
-  printf("%d\n", numStack[0]);
+  printd(numStack[0]);
+  // printf("%f", numStack[0]);
   return 0;
 }
 
