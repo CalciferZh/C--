@@ -14,15 +14,17 @@ public:
   std::vector<Token> tkStream;
 
   std::map<int, int> precTable = {
-    {tok_assignOp, 2},
-    {tok_lessOp, 10},
-    {tok_greaterOp, 10},
-    {tok_euqalOp, 10},
-    {tok_nEqualOp, 10},
-    {tok_addOp, 20},
-    {tok_subtractOp, 20},
-    {tok_multiplyOp, 40},
-    {tok_divideOp, 40}
+    {tok_assignOp, 1},
+    {tok_lessOp, 100},
+    {tok_greaterOp, 100},
+    {tok_logicOrOp, 1},
+    {tok_logicAndOp, 1},
+    {tok_euqalOp, 100},
+    {tok_nEqualOp, 100},
+    {tok_addOp, 200},
+    {tok_subtractOp, 200},
+    {tok_multiplyOp, 400},
+    {tok_divideOp, 400}
   };
 
   std::map<std::string, std::unique_ptr<Variable>> varTable;
@@ -56,6 +58,8 @@ public:
   std::unique_ptr<ExprAST> parseIntExpr();
 
   std::unique_ptr<ExprAST> parseStringExpr();
+
+  std::unique_ptr<ExprAST> parseCharExpr();
 
   std::unique_ptr<ExprAST> parseParenExpr();
 

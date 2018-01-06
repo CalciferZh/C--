@@ -19,7 +19,7 @@ number  {num1}|{num2}
 %%
 
 {ws}                  /* skip blanks and tabs */
-"//".*                  /* skip comments */
+"//".*                /* skip comments */
 var                   return(tok_var);
 int                   return{tok_intType};
 double                return{tok_doubleType};
@@ -33,6 +33,9 @@ return                return(tok_return);
 break                 return(tok_break);
 extern                return(tok_extern);
 =                     return(tok_assignOp);
+\'.\'                 return(tok_char);
+\|\|                  return(tok_logicOrOp);
+\&\&                  return(tok_logicAndOp);
 \;                    return(tok_semicolon);
 \(                    return(tok_lParenthesis);
 \)                    return(tok_rParenthesis);  
