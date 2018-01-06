@@ -102,9 +102,18 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr() {
   }
   auto name = tkStream[curIdx].val;
   ++curIdx; // eat var name
-  std::unique_ptr<ExprAST> size = nullptr;
+  int size = 0;
   if (tkStream[curIdx].tp == tok_lSquareBracket) {
-    size = parseSqrBrktExpr();
+    ++curIdx; // eat '['
+    if (tkStream[curIdx].tp != tok_integer) {
+      throw ParseException("const integer expression", tkStream[curIdx].val.c_str(), tkStream[curIdx].lineNo);
+    }
+    size = std::stoi(tkStream[curIdx].val);
+    ++curIdx; // eat integer
+    if (tkStream[curIdx].tp != tok_rSquareBracket) {
+      throw ParseException("']'", tkStream[curIdx].val.c_str(), tkStream[curIdx].lineNo);
+    }
+    ++curIdx; // eat ']'
   }
   std::unique_ptr<ExprAST> init = nullptr;
   if (tkStream[curIdx].tp == tok_assignOp) {
@@ -115,7 +124,7 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr() {
     throw ParseException("';'", tkStream[curIdx].val.c_str(), tkStream[curIdx].lineNo);
   }
   ++curIdx; // est ';'
-  return llvm::make_unique<DeclareExprAST>(varTp, std::move(name), std::move(size), std::move(init));
+  return llvm::make_unique<DeclareExprAST>(varTp, std::move(name), size, std::move(init));
 }
 
 std::unique_ptr<ExprAST> Parser::parsePrimary() {
