@@ -36,8 +36,7 @@ llvm::Value* IntExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* StringExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: StringExpr\n";
-  // nothing to do! except for char[] init
-  return nullptr;
+  return builder.CreateGlobalStringPtr(val);
 }
 
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
@@ -83,6 +82,10 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
     return isFloat ? builder.CreateFRem(L, R, "remtmp") : builder.CreateSRem(L, R, "remtmp");
   case tok_assignOp:
     return builder.CreateStore(R, L, false);
+  case tok_logicOrOp:
+    return builder.CreateOr(L, R, "ortmp");
+  case tok_logicAndOp:
+    return builder.CreateAnd(L, R, "andtmp");
   default:
     std::cout << "invalid binary operator\n";
     return nullptr;
@@ -113,7 +116,8 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
       std::cout << "Error when loading variable\n";
       return nullptr;
     }
-    if (!R && init->getClassType() != 3) { // R==nullptr is acceptable only if stringexpr
+    // Vica: Since we have create globle string, now we gonna try to figure out how to extern 'puts'
+    if (!R && init->getClassType() != 3) { // Vica: R==nullptr is acceptable only if stringexpr
       std::cout << "Invalid expression\n";
       return nullptr;
     }
