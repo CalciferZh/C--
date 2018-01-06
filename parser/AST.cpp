@@ -24,6 +24,16 @@ llvm::Type* getLLVMType(int tok_type, llvm::LLVMContext& context) {
   return type;
 }
 
+int getTokType(llvm::Type* type) {
+  if (type->isFloatTy())
+    return tok_doubleType;
+  if (type->isIntegerTy(8))
+    return tok_charType;
+  if (type->isIntegerTy(32))
+    return tok_intType;  
+  return 0;
+}
+
 llvm::Value* RealExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: RealExpr\n";
   return llvm::ConstantFP::get(context, llvm::APFloat(val));
@@ -50,7 +60,8 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
     return builder.CreateLoad(varTable[name]->addr, name.c_str());
   } else {
     llvm::Value* len = offset->codegen(builder, varTable, context, module);
-    return builder.CreateInBoundsGEP(varTable[name]->addr, len);
+    llvm::Value* ptr = builder.CreateInBoundsGEP(varTable[name]->addr, len);
+    return builder.CreateLoad(ptr, name.c_str());
   }
 }
 
@@ -61,7 +72,14 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
       std::cout << "lvalue should be variable\n";
       return nullptr;
     }
-    llvm::Value* L = varTable[static_cast<VariableExprAST*>(LHS.get())->name]->addr;
+    VariableExprAST* lhs = static_cast<VariableExprAST*>(LHS.get());
+    llvm::Value* L = nullptr;
+    if (lhs->offset == nullptr)
+      L = varTable[lhs->name]->addr;
+    else {
+      llvm::Value* len = lhs->offset->codegen(builder, varTable, context, module);
+      L = builder.CreateInBoundsGEP(varTable[lhs->name]->addr, len);
+    }
     llvm::Value* R = RHS->codegen(builder, varTable, context, module);
     // vica: need change type maybe
     return builder.CreateStore(R, L, false);
@@ -190,11 +208,11 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   }
   CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "ifcond");
   // Vica: why use function here?
-  //llvm::Function *func = builder.GetInsertBlock()->getParent();
+  llvm::Function* func = builder.GetInsertBlock()->getParent();
   // Create blocks for the then and else cases.  Insert the 'then' block at the end of the function.
-  llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(context, "then"/*, func*/);
-  llvm::BasicBlock* ElseBB = llvm::BasicBlock::Create(context, "else");
-  llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(context, "ifcont");
+  llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(context, "then", func);
+  llvm::BasicBlock* ElseBB = llvm::BasicBlock::Create(context, "else", func);
+  llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(context, "ifcont", func);
   builder.CreateCondBr(CondV, ThenBB, ElseBB);
   // Emit then value.
   builder.SetInsertPoint(ThenBB);
@@ -243,9 +261,10 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: WhileExpr\n";
-  llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "cond");
-  llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "body");
-  llvm::BasicBlock* FiniBB = llvm::BasicBlock::Create(context, "finish");
+  llvm::Function* func = builder.GetInsertBlock()->getParent();
+  llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "whilecond", func);
+  llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "whilebody", func);
+  llvm::BasicBlock* FiniBB = llvm::BasicBlock::Create(context, "whilefinish", func);
   breakWhile = FiniBB;
   builder.CreateBr(CondBB);
   // Emit cond value
@@ -255,7 +274,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
     std::cout << "Error in condition\n";
     return nullptr;
   }
-  CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "whilecond");
+  CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "whilecondtmp");
   builder.CreateCondBr(CondV, BodyBB, FiniBB);
   CondBB = builder.GetInsertBlock();
   // Emit body value
@@ -284,15 +303,20 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: CallExpr\n";
   // Vica: need to get the func
   llvm::Function* func = module->getFunction(callee);
+  if (!func) {
+    std::cout << "Unknown function\n";
+    return nullptr;
+  }
+  if (params.size() != func->arg_size()) {
+    std::cout << "Unmatch arguments\n";
+    return nullptr;
+  }
   std::vector<llvm::Value*> Params;
   for (auto& param : params) {
     llvm::Value* v = param->codegen(builder, varTable, context, module);
     Params.push_back(v);
   }
-  std::cout<<"begin call\n";
-  auto tmp = builder.CreateCall(func, Params, callee);
-  std::cout<<"end call\n";
-  return tmp;
+  return builder.CreateCall(func, Params, callee);
 }
 
 llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
@@ -327,9 +351,6 @@ llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
 
 llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   std::cout << "Generating: Function\n";
-  if (body.empty()) {
-    // Vica: handle declartion
-  }
   // First, check for an existing function from a previous 'extern' declaration.
   llvm::Function* func = module->getFunction(proto->name);
 
@@ -338,7 +359,9 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
 
   if (!func)
     return nullptr;
-
+  if (body.empty()) { // just a declaration
+    return func;
+  }
   // Create a new basic block to start insertion into.
   llvm::BasicBlock* BB = llvm::BasicBlock::Create(context, "entry", func);
   builder.SetInsertPoint(BB);
@@ -347,12 +370,13 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   // varTable.clear();
   // Vica: I dont know whether should I clear it?
   // Vica: I dont know how to use it. Arg is llvm::Argument type while varTable is llvm::AllocaInst.
-  std::map<std::string, llvm::Value*> SelfNamedValues;
+  std::map<std::string, std::unique_ptr<Variable>> selfVarTable;
+  //
   for (auto& Arg : func->args())
-    SelfNamedValues[Arg.getName()] = &Arg;
-  // Vica: I think the varTable should be change to "SelfNamedValues", but the type is different.
+    //NamedValues[Arg.getName()] = &Arg;
+    selfVarTable[Arg.getName()] = std::unique_ptr<Variable>(new Variable(Arg.getName(), getTokType(Arg.getType()), nullptr));
   for (auto& b : body) {
-    b->codegen(builder, varTable, context, module);
+    b->codegen(builder, selfVarTable, context, module);
   }
   return func;
   // Vica: It tell me there is some bug and delete it wtf?

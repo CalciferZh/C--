@@ -2,24 +2,24 @@ extern void printd(double val);
 // #include <stdio.h>
 
 int isOp(char ch) {
-  if (ch == '+') {
-    return 1;
-  }
-  if (ch == '-') {
-    return 2;
-  }
-  if (ch == '*') {
-    return 3;
-  }
-  if (ch == '/') {
-    return 4;
-  }
-  if (ch == '(') {
-    return 5;
-  }
-  if (ch == ')') {
-    return 6;
-  }
+//  if (ch == '+') {
+//    return 1;
+//  }
+//  if (ch == '-') {
+//    return 2;
+//  }
+//  if (ch == '*') {
+//    return 3;
+//  }
+//  if (ch == '/') {
+//    return 4;
+//  }
+//  if (ch == '(') {
+//    return 5;
+//  }
+//  if (ch == ')') {
+//    return 6;
+//  }
   return 0;
 }
 
