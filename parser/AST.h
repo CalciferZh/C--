@@ -126,7 +126,7 @@ public:
 
   std::unique_ptr<ExprAST> init = nullptr;
 
-  int size;
+  int size = 0;
 
   DeclareExprAST(int tp, std::string name, int size, std::unique_ptr<ExprAST> init) : tp(tp), name(std::move(name)), init(std::move(init)), size(size) {}
 
