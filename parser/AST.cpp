@@ -1,6 +1,9 @@
 #include "AST.h"
 #include "../lexer/token.h"
 
+// Vica: this is so dirty...
+static llvm::BasicBlock* breakWhile = nullptr;
+
 llvm::Type* getLLVMType(int tok_type, llvm::LLVMContext& context) {
   llvm::Type* type;
   switch(tok_type) {
@@ -150,9 +153,9 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   }
   CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "ifcond");
   // Vica: why use function here?
-  llvm::Function *func = builder.GetInsertBlock()->getParent();
+  //llvm::Function *func = builder.GetInsertBlock()->getParent();
   // Create blocks for the then and else cases.  Insert the 'then' block at the end of the function.
-  llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(context, "then", func);
+  llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(context, "then"/*, func*/);
   llvm::BasicBlock* ElseBB = llvm::BasicBlock::Create(context, "else");
   llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(context, "ifcont");
   builder.CreateCondBr(CondV, ThenBB, ElseBB);
@@ -176,9 +179,9 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
   ThenBB = builder.GetInsertBlock();
   // Emit else block.
-  func->getBasicBlockList().push_back(ElseBB);
+  //func->getBasicBlockList().push_back(ElseBB);
   builder.SetInsertPoint(ElseBB);
-    for (auto& elsse : elseBody) {
+  for (auto& elsse : elseBody) {
     llvm::Value *ElseV = elsse->codegen(builder, varTable, context, module);
     if (firstElse) {
       firstElseV = ElseV;
@@ -193,10 +196,9 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   // codegen of 'Else' can change the current block, update ElseBB for the PHI.
   ElseBB = builder.GetInsertBlock();
   // Emit merge block.
-  func->getBasicBlockList().push_back(MergeBB);
+  //func->getBasicBlockList().push_back(MergeBB);
   builder.SetInsertPoint(MergeBB);
   llvm::PHINode *PN = builder.CreatePHI(llvm::Type::getDoubleTy(context), 2, "iftmp");
-
   PN->addIncoming(firstThenV, ThenBB);
   PN->addIncoming(firstElseV, ElseBB);
   return PN;
@@ -207,6 +209,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "cond");
   llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "body");
   llvm::BasicBlock* FiniBB = llvm::BasicBlock::Create(context, "finish");
+  breakWhile = FiniBB;
   builder.CreateBr(CondBB);
   // Emit cond value
   builder.SetInsertPoint(CondBB);
@@ -223,17 +226,14 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   for (auto& b : body) {
     llvm::Value* BodyV = b->codegen(builder, varTable, context, module);
     if (!BodyV) {
-      if (b->getClassType() == 11) {
-        builder.CreateBr(FiniBB);
-      } else {
         std::cout << "Error in body\n";
         return nullptr;
       }
-    }
   }
   builder.CreateBr(CondBB);
   BodyBB = builder.GetInsertBlock();
   builder.SetInsertPoint(FiniBB);
+  breakWhile = nullptr;
   // Vica: What should I return?
   return nullptr;
 }
@@ -246,18 +246,26 @@ llvm::Value* ReturnExprAST::codegen(CODEGENPARM) {
 llvm::Value* CallExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: CallExpr\n";
   // Vica: need to get the func
-  llvm::Function* func = nullptr;
+  llvm::Function* func = module->getFunction(callee);
   std::vector<llvm::Value*> Params;
   for (auto& param : params) {
     llvm::Value* v = param->codegen(builder, varTable, context, module);
     Params.push_back(v);
   }
-  return builder.CreateCall(func, Params, callee);
+  std::cout<<"begin call\n";
+  auto tmp = builder.CreateCall(func, Params, callee);
+  std::cout<<"end call\n";
+  return tmp;
 }
 
 llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: BreakExpr\n";
-  return nullptr;
+  if (breakWhile) {
+    return builder.CreateBr(breakWhile);
+  } else {
+    std::cout << "No loop\n";
+    return nullptr;
+  }
 }
 
 llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
