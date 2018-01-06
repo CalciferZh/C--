@@ -178,6 +178,15 @@ std::unique_ptr<ExprAST> Parser::parseExpression() {
   return parseBinOpRHS(0, std::move(LHS));
 }
 
+std::unique_ptr<ExprAST> Parser::parseSingleExpr() {
+  auto result = parseExpression();
+  if (tkStream[curIdx].tp != tok_semicolon) {
+    throw ParseException("';'", tkStream[curIdx].val.c_str(), tkStream[curIdx].lineNo);
+  }
+  ++curIdx; // eat ';'
+  return result;
+}
+
 std::unique_ptr<ExprAST> Parser::parseBreakExpr() {
   ++curIdx; // eat break
   if (tkStream[curIdx].tp != tok_semicolon) {
@@ -196,7 +205,7 @@ std::unique_ptr<ExprAST> Parser::parseStatement() {
     case tok_charType:
       return parseDeclareExpr();
     case tok_identifier:
-      return parseAssignExpr();
+      return parseSingleExpr();
     case tok_while:
       return parseWhileExpr();
     case tok_if:
