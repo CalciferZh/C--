@@ -184,8 +184,27 @@ extern yy_size_t yyleng;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
-    #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
+    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
+     *       access to the local variable yy_act. Since yyless() is a macro, it would break
+     *       existing scanners that call yyless() from OUTSIDE yylex. 
+     *       One obvious solution it to make yy_act a global. I tried that, and saw
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
+     *       normally declared as a register variable-- so it is not worth it.
+     */
+    #define  YY_LESS_LINENO(n) \
+            do { \
+                int yyl;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
+            }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
+                        --yylineno;\
+            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -471,6 +490,12 @@ static yyconst flex_int16_t yy_chk[162] =
        90
     } ;
 
+/* Table of booleans, true if rule could match eol. */
+static yyconst flex_int32_t yy_rule_can_match_eol[37] =
+    {   0,
+1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,     };
+
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
  */
@@ -479,9 +504,9 @@ static yyconst flex_int16_t yy_chk[162] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "c--.lex"
-#line 3 "c--.lex"
+#line 4 "c--.lex"
 #include "token.h"
-#line 485 "lex.yy.cc"
+#line 510 "lex.yy.cc"
 
 #define INITIAL 0
 
@@ -613,10 +638,10 @@ YY_DECL
 		}
 
 	{
-#line 18 "c--.lex"
+#line 19 "c--.lex"
 
 
-#line 620 "lex.yy.cc"
+#line 645 "lex.yy.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -662,6 +687,16 @@ yy_find_action:
 
 		YY_DO_BEFORE_ACTION;
 
+		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
+			{
+			yy_size_t yyl;
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					   
+    yylineno++;
+;
+			}
+
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -676,185 +711,185 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 20 "c--.lex"
+#line 21 "c--.lex"
 /* skip blanks and tabs */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 21 "c--.lex"
+#line 22 "c--.lex"
 return(tok_var);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 22 "c--.lex"
+#line 23 "c--.lex"
 return{tok_intType};
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 23 "c--.lex"
+#line 24 "c--.lex"
 return{tok_doubleType};
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 24 "c--.lex"
+#line 25 "c--.lex"
 return{tok_stringType};
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 25 "c--.lex"
+#line 26 "c--.lex"
 return(tok_voidType);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 26 "c--.lex"
+#line 27 "c--.lex"
 return(tok_charType);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 27 "c--.lex"
+#line 28 "c--.lex"
 return(tok_if);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 28 "c--.lex"
+#line 29 "c--.lex"
 return(tok_else);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 29 "c--.lex"
+#line 30 "c--.lex"
 return(tok_while);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 30 "c--.lex"
+#line 31 "c--.lex"
 return(tok_return);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 31 "c--.lex"
+#line 32 "c--.lex"
 return(tok_break);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 32 "c--.lex"
+#line 33 "c--.lex"
 return(tok_extern);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 33 "c--.lex"
+#line 34 "c--.lex"
 return(tok_assignOp);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 34 "c--.lex"
+#line 35 "c--.lex"
 return(tok_semicolon);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 35 "c--.lex"
+#line 36 "c--.lex"
 return(tok_lParenthesis);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 36 "c--.lex"
+#line 37 "c--.lex"
 return(tok_rParenthesis);  
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 37 "c--.lex"
+#line 38 "c--.lex"
 return(tok_lBrace);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 38 "c--.lex"
+#line 39 "c--.lex"
 return(tok_rBrace);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 39 "c--.lex"
+#line 40 "c--.lex"
 return(tok_addOp);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 40 "c--.lex"
+#line 41 "c--.lex"
 return(tok_subtractOp);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 41 "c--.lex"
+#line 42 "c--.lex"
 return(tok_multiplyOp);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 42 "c--.lex"
+#line 43 "c--.lex"
 return(tok_divideOp);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 43 "c--.lex"
+#line 44 "c--.lex"
 return(tok_string);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 44 "c--.lex"
+#line 45 "c--.lex"
 return(tok_integer);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 45 "c--.lex"
+#line 46 "c--.lex"
 return(tok_real);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 46 "c--.lex"
+#line 47 "c--.lex"
 return(tok_lessOp);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 47 "c--.lex"
+#line 48 "c--.lex"
 return(tok_greaterOp);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 48 "c--.lex"
+#line 49 "c--.lex"
 return(tok_euqalOp);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 49 "c--.lex"
+#line 50 "c--.lex"
 return(tok_nEqualOp);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 50 "c--.lex"
+#line 51 "c--.lex"
 return(tok_modOp);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 51 "c--.lex"
+#line 52 "c--.lex"
 return(tok_identifier);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 52 "c--.lex"
+#line 53 "c--.lex"
 return(tok_lSquareBracket);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 53 "c--.lex"
+#line 54 "c--.lex"
 return(tok_rSquareBracket);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 54 "c--.lex"
+#line 55 "c--.lex"
 return(tok_comma);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 56 "c--.lex"
+#line 57 "c--.lex"
 ECHO;
 	YY_BREAK
-#line 858 "lex.yy.cc"
+#line 893 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1337,6 +1372,10 @@ int yyFlexLexer::yy_get_next_buffer()
 
 	*--yy_cp = (char) c;
 
+    if ( c == '\n' ){
+        --yylineno;
+    }
+
 	(yytext_ptr) = yy_bp;
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
@@ -1406,6 +1445,11 @@ int yyFlexLexer::yy_get_next_buffer()
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
 	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
+
+	if ( c == '\n' )
+		   
+    yylineno++;
+;
 
 	return c;
 }
@@ -1809,7 +1853,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 56 "c--.lex"
+#line 57 "c--.lex"
 
 
 

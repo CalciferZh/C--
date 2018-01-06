@@ -60,7 +60,9 @@ public:
 
   std::string val;
 
-  Token(int tokenType, std::string tokenValue) : tp(tokenType), val(std::move(tokenValue)) {}
+  int lineNo;
+
+  Token(int tokenType, std::string tokenValue, int lineNo) : tp(tokenType), val(std::move(tokenValue)), lineNo(lineNo) {}
 };
 
 #endif

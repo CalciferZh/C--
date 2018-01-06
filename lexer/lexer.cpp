@@ -6,7 +6,7 @@ vector<Token> Lexer::analyze() {
   int tkType;
   vector<Token> tkStream;
   while ((tkType = worker->yylex()) != 0) {
-    tkStream.emplace_back(tkType, string(worker->YYText()));
+    tkStream.emplace_back(tkType, string(worker->YYText()), worker->lineno());
   }
   return tkStream;
 }

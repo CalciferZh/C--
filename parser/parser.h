@@ -6,6 +6,7 @@
 #include "./function.h"
 #include "../lexer/lexer.h"
 #include "../lexer/token.h"
+#include "./exception.h"
 #include <utility>
 
 class Parser {
