@@ -799,12 +799,12 @@ return(tok_char);
 case 17:
 YY_RULE_SETUP
 #line 37 "c--.lex"
-return(tok_logicOr);
+return(tok_logicOrOp);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 38 "c--.lex"
-return(tok_logicAnd);
+return(tok_logicAndOp);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP

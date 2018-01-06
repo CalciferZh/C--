@@ -72,6 +72,17 @@ public:
   // llvm::Value *codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
 };
 
+class CharExprAST : public ExprAST {
+public:
+  char val;
+
+  CharExprAST(const std::string &val) : val(val[0]) {}
+
+  void print() override {
+    std::cout << "Char: " << val << '\n';
+  }
+};
+
 class VariableExprAST : public ExprAST {
 public:
   std::string name;
@@ -89,7 +100,7 @@ public:
 
     std::cout << "offset: {\n";
     offset->print();
-    std::cout << "}\n";
+    std::cout << "}\n}\n";
   }
 
   // llvm::Value* codegen(llvm::IRBuilder<>& builder, std::map<std::string, llvm::AllocaInst*> varTable) override;
@@ -156,9 +167,9 @@ public:
   IfExprAST(std::unique_ptr<ExprAST> cond, std::vector<std::unique_ptr<ExprAST>> ifBody, std::vector<std::unique_ptr<ExprAST>> elseBody) : cond(std::move(cond)), ifBody(std::move(ifBody)), elseBody(std::move(elseBody)) {}
 
   void print() override {
-    std::cout << "If-else: {\n" << "condition:\n";
+    std::cout << "If-else: {\n" << "condition: {\n";
     cond->print();
-    std::cout << "if body: {\n";
+    std::cout << "}\nif body: {\n";
     for (const auto& expr: ifBody) {
       expr->print();
     }
@@ -213,7 +224,7 @@ public:
   CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> params) : callee(callee), params(std::move(params)) {}
 
   void print() override {
-    std::cout << "Call: {\n" << "callee: " << callee << "\n}\nparams: {\n";
+    std::cout << "Call: {\n" << "callee: " << callee << "\nparams: {\n";
     for (const auto& expr: params) {
       expr->print();
     }
@@ -261,9 +272,9 @@ public:
   FunctionAST(std::unique_ptr<PrototypeAST> proto, std::vector<std::unique_ptr<ExprAST>> body) : proto(std::move(proto)), body(std::move(body)) {}
 
   void print() {
-    std::cout << "Function: {\n" << "prototype:\n";
+    std::cout << "Function: {\n" << "prototype: {\n";
     proto->print();
-    std::cout << "body: {\n";
+    std::cout << "}\nbody: {\n";
     for (const auto& expr: body) {
       expr->print();
     }

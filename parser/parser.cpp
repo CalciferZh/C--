@@ -21,6 +21,12 @@ std::unique_ptr<ExprAST> Parser::parseStringExpr() {
   return std::move(result);
 }
 
+std::unique_ptr<ExprAST> Parser::parseCharExpr() {
+  auto result = llvm::make_unique<CharExprAST>(tkStream[curIdx].val);
+  ++curIdx;
+  return std::move(result);
+}
+
 std::unique_ptr<ExprAST> Parser::parseParenExpr() {
   // std::cout << "Parsing parenthesis expression." << '\n';
   ++curIdx; // eat '('
@@ -138,6 +144,8 @@ std::unique_ptr<ExprAST> Parser::parsePrimary() {
       return parseIntExpr();
     case tok_real:
       return parseRealExpr();
+    case tok_char:
+      return parseCharExpr();
     case tok_identifier:
       return parseIdentifierExpr();
     default:

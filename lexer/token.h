@@ -47,8 +47,8 @@ enum {
   tok_charType = -33,
   tok_break = -34,
   tok_char = -35,
-  tok_logicOr = -36,
-  tok_logicAnd = -37,
+  tok_logicOrOp = -36,
+  tok_logicAndOp = -37,
 
   tok_identifier = -38
 };
