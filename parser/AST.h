@@ -126,9 +126,9 @@ public:
 
   std::unique_ptr<ExprAST> init = nullptr;
 
-  std::unique_ptr<ExprAST> size = nullptr;
+  int size;
 
-  DeclareExprAST(int tp, std::string name, std::unique_ptr<ExprAST> size, std::unique_ptr<ExprAST> init) : tp(tp), name(std::move(name)), init(std::move(init)), size(std::move(size)) {}
+  DeclareExprAST(int tp, std::string name, int size, std::unique_ptr<ExprAST> init) : tp(tp), name(std::move(name)), init(std::move(init)), size(size) {}
 
   void print() override {
     std::cout << "Declaration for " << tp << ": { \n" << "name: " << name;

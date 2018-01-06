@@ -39,10 +39,6 @@ llvm::Value* StringExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: VariableExpr\n";
-  if (varTable.find(name) != varTable.end()) {
-    std::cout << "Unknown variable\n";
-    return nullptr;
-  }
   if (offset == nullptr){
     return builder.CreateLoad(varTable[name]->addr, name.c_str());
   } else {
@@ -92,19 +88,17 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: DeclareExpr\n";
-  uint64_t len = 0;
   if (varTable.find(name) != varTable.end()) {
     std::cout << "Variable redefinition\n";
     return nullptr;
   } else {
     llvm::Type* type = getLLVMType(tp, context);
-    if (size != nullptr) {
-      auto* sz = llvm::dyn_cast<llvm::ConstantInt>(size->codegen(builder, varTable, context, module));
-      if (sz != nullptr) {
-        len = sz->getZExtValue();
-        if (len != 0)
-          type = llvm::ArrayType::get(type, len);
-      }
+    if (size < 0) {
+      std::cout << "Negative size\n";
+      return nullptr;
+    }
+    if (size != 0)
+      type = llvm::ArrayType::get(type, size);
     }
     llvm::AllocaInst* addr = builder.CreateAlloca(type, 0, nullptr, name.c_str());
     varTable[name] = std::unique_ptr<Variable>(new Variable(name, tp, addr));
@@ -116,7 +110,7 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
       std::cout << "Error when loading variable\n";
       return nullptr;
     }
-    if (!R && tp != tok_stringType) {
+    if (!R && tp != tok_charType) {
       std::cout << "Invalid expression\n";
       return nullptr;
     }
@@ -229,8 +223,12 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   for (auto& b : body) {
     llvm::Value* BodyV = b->codegen(builder, varTable, context, module);
     if (!BodyV) {
-      std::cout << "Error in body\n";
-      return nullptr;
+      if (auto breakPtr = llvm::dyncast<BreakExprAST*>(b)) {
+        builder.CreateBr(FiniBB);
+      } else {
+        std::cout << "Error in body\n";
+        return nullptr;
+      }
     }
   }
   builder.CreateBr(CondBB);
@@ -259,7 +257,6 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: BreakExpr\n";
-  // Vica: need to know where to jump
   return nullptr;
 }
 
