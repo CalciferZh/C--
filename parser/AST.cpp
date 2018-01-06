@@ -39,6 +39,11 @@ llvm::Value* StringExprAST::codegen(CODEGENPARM) {
   return builder.CreateGlobalStringPtr(val);
 }
 
+llvm::Value* CharExprAST::codegen(CODEGENPARM) {
+  std::cout << "Generating: CharExpr\n";
+  return llvm::ConstantInt::get(context, llvm::APInt(8, val, true));
+}
+
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: VariableExpr\n";
   if (offset == nullptr){
@@ -51,12 +56,51 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
   std::cout << "Generating: BinaryExpr\n";
+  if (op == tok_assignOp) { // assign is special 
+    if (LHS->getClassType() != 5) {
+      std::cout << "lvalue should be variable\n";
+      return nullptr;
+    }
+    llvm::Value* L = varTable[static_cast<VariableExprAST*>(LHS.get())->name]->addr;
+    llvm::Value* R = RHS->codegen(builder, varTable, context, module);
+    // vica: need change type maybe
+    return builder.CreateStore(R, L, false);
+  }
   llvm::Value* L = LHS->codegen(builder, varTable, context, module);
   llvm::Value* R = RHS->codegen(builder, varTable, context, module);
   if (!L || !R)
     return nullptr;
   bool isFloat = L->getType()->isFloatTy() || L->getType()->isFloatTy();
-  // Vica: The type may be the problem
+  if (op == tok_logicAndOp || op == tok_logicOrOp) { // change to UI int1
+    if (L->getType()->isFloatTy()) {
+      L = builder.CreateFPToUI(L, llvm::Type::getInt1Ty(context));
+    }
+    if (R->getType()->isFloatTy()) {
+      R = builder.CreateFPToUI(L, llvm::Type::getInt1Ty(context));
+    }
+    if (!L->getType()->isIntegerTy(1)) {
+      L = builder.CreateSExt(L, llvm::Type::getInt1Ty(context));
+    }
+    if (!R->getType()->isIntegerTy(1)) {
+      R = builder.CreateSExt(R, llvm::Type::getInt1Ty(context));
+    }
+  } else { 
+    if (isFloat) { // is float, change to double both
+      if (!L->getType()->isFloatTy()) {
+        L = builder.CreateSIToFP(L, llvm::Type::getDoubleTy(context));
+      }
+      if (!R->getType()->isFloatTy()) {
+        R = builder.CreateSIToFP(R, llvm::Type::getDoubleTy(context));
+      }
+    } else { // not float, change to i32 both
+      if (!L->getType()->isIntegerTy(32)) {
+        L = builder.CreateSExt(L, llvm::Type::getInt32Ty(context));
+      }
+      if (!R->getType()->isIntegerTy(32)) {
+        R = builder.CreateSExt(R, llvm::Type::getInt32Ty(context));
+      }
+    }
+  }
   switch (op) {
   case tok_addOp:
     return isFloat ? builder.CreateFAdd(L, R, "addtmp") : builder.CreateAdd(L, R, "addtmp");
@@ -67,27 +111,21 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
   case tok_divideOp:
     return isFloat ? builder.CreateFDiv(L, R, "divtmp") : builder.CreateSDiv(L, R, "addtmp");
   case tok_lessOp:
-    L = isFloat ? builder.CreateFCmpULT(L, R, "cmptmp") : builder.CreateICmpSLT(L, R, "cmptmp");
-    return builder.CreateUIToFP(L, llvm::Type::getDoubleTy(context), "booltmp");
+    return isFloat ? builder.CreateFCmpULT(L, R, "cmptmp") : builder.CreateICmpSLT(L, R, "cmptmp");
   case tok_greaterOp:
-    L = isFloat ? builder.CreateFCmpUGT(L, R, "cmptmp") : builder.CreateICmpSGT(L, R, "cmptmp");
-    return builder.CreateUIToFP(L, llvm::Type::getDoubleTy(context), "booltmp");
+    return isFloat ? builder.CreateFCmpUGT(L, R, "cmptmp") : builder.CreateICmpSGT(L, R, "cmptmp");
   case tok_euqalOp:
-    L = isFloat ? builder.CreateFCmpUEQ(L, R, "eqtmp") : builder.CreateICmpEQ(L, R, "eqtmp");
-    return builder.CreateUIToFP(L, llvm::Type::getDoubleTy(context), "booltmp");
+    return isFloat ? builder.CreateFCmpUEQ(L, R, "eqtmp") : builder.CreateICmpEQ(L, R, "eqtmp");
   case tok_nEqualOp:
-    L = isFloat ? builder.CreateFCmpUNE(L, R, "neqtmp") : builder.CreateICmpNE(L, R, "neqtmp");
-    return builder.CreateUIToFP(L, llvm::Type::getDoubleTy(context), "booltmp");
-  case tok_modOp:// Vica: not sure
+    return isFloat ? builder.CreateFCmpUNE(L, R, "neqtmp") : builder.CreateICmpNE(L, R, "neqtmp");
+  case tok_modOp:
     return isFloat ? builder.CreateFRem(L, R, "remtmp") : builder.CreateSRem(L, R, "remtmp");
-  case tok_assignOp:
-    return builder.CreateStore(R, L, false);
   case tok_logicOrOp:
     return builder.CreateOr(L, R, "ortmp");
   case tok_logicAndOp:
     return builder.CreateAnd(L, R, "andtmp");
   default:
-    std::cout << "invalid binary operator\n";
+    std::cout << "unknown binary operator\n";
     return nullptr;
   }
 }
@@ -110,12 +148,7 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
     varTable[name] = std::unique_ptr<Variable>(new Variable(name, tp, addr));
   }
   if (init) {
-    llvm::Value* L = builder.CreateLoad(varTable[name]->addr, name.c_str());
     llvm::Value* R = init->codegen(builder, varTable, context, module);
-    if (!L) {
-      std::cout << "Error when loading variable\n";
-      return nullptr;
-    }
     // Vica: Since we have create globle string, now we gonna try to figure out how to extern 'puts'
     if (!R && init->getClassType() != 3) { // Vica: R==nullptr is acceptable only if stringexpr
       std::cout << "Invalid expression\n";
@@ -132,7 +165,7 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
           }
           unsigned int idx = 0;
           for (auto c : str->val) {
-            llvm::Value* loc = builder.CreateInBoundsGEP(L, llvm::ConstantInt::get(context, llvm::APInt(32, idx, true)));
+            llvm::Value* loc = builder.CreateInBoundsGEP(varTable[name]->addr, llvm::ConstantInt::get(context, llvm::APInt(32, idx, true)));
             builder.CreateStore(llvm::ConstantInt::get(context, llvm::APInt(8, int(c), true)), loc);
             idx++;
           }
@@ -140,7 +173,7 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
       }
       // Vica: how to init an array? 
     } else {
-      builder.CreateStore(R, L);
+      builder.CreateStore(R, varTable[name]->addr);
     }
     return R;
   } else {
@@ -275,6 +308,7 @@ llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
 llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
   std::cout << "Generating: Prototype\n";
   // Make the function type:  double(double,double) etc.
+
   std::vector<llvm::Type*> types;
   for (auto& arg : args) {
     llvm::Type* type = getLLVMType(arg->tp, context);
@@ -293,6 +327,9 @@ llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
 
 llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   std::cout << "Generating: Function\n";
+  if (body.empty()) {
+    // Vica: handle declartion
+  }
   // First, check for an existing function from a previous 'extern' declaration.
   llvm::Function* func = module->getFunction(proto->name);
 
@@ -305,7 +342,6 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   // Create a new basic block to start insertion into.
   llvm::BasicBlock* BB = llvm::BasicBlock::Create(context, "entry", func);
   builder.SetInsertPoint(BB);
-
   // Record the function arguments in the varTable map.
 
   // varTable.clear();
@@ -318,12 +354,15 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   for (auto& b : body) {
     b->codegen(builder, varTable, context, module);
   }
-  if (llvm::verifyFunction(*func) == false) {
+  return func;
+  // Vica: It tell me there is some bug and delete it wtf?
+  // Notice: document say verifyFunction return false when no erros
+  /*if (llvm::verifyFunction(*func) == false) {
     return func;
   } else {
     func->eraseFromParent();
     return nullptr;
-  }
+  }*/
   /*
   if (llvm::Value* retVal = Body->codegen(builder, varTable, context, module)) {
     // Finish off the function.

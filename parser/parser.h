@@ -43,6 +43,7 @@ public:
 
   size_t curIdx;
 
+  // Vica: maybe need to do some init jobs like declare the function puts
   Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)), builder(llvm::IRBuilder<>(context)),
     module(llvm::make_unique<llvm::Module>("gg myfriend", context)) {}
 
