@@ -377,7 +377,6 @@ int Parser::getCurTkPrec() {
 }
 
 void Parser::print() {
-  std::cout << "========================= functions ==============================\n";
   for (const auto& func : functions) {
     func->print();
     std::cout << '\n';
