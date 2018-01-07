@@ -2,7 +2,7 @@
 #include "../lexer/token.h"
 
 // Vica: this is so dirty...
-static llvm::BasicBlock* breakWhile = nullptr;
+std::vector<llvm::BasicBlock*> breakWhile;
 
 #define NOOUPUT if(false)
 
@@ -276,7 +276,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "whilecond", func);
   llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "whilebody", func);
   llvm::BasicBlock* FiniBB = llvm::BasicBlock::Create(context, "whilefinish", func);
-  breakWhile = FiniBB;
+  breakWhile.push_back(FiniBB);
   builder.CreateBr(CondBB);
   // Emit cond value
   builder.SetInsertPoint(CondBB);
@@ -300,7 +300,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   llvm::Value* ret = builder.CreateBr(CondBB);
   BodyBB = builder.GetInsertBlock();
   builder.SetInsertPoint(FiniBB);
-  breakWhile = nullptr;
+  breakWhile.pop_back();
   // Vica: What should I return?
   return ret;
 }
@@ -334,8 +334,8 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: BreakExpr\n";
-  if (breakWhile) {
-    return builder.CreateBr(breakWhile);
+  if (!breakWhile.empty()) {
+    return builder.CreateBr(breakWhile.back());
   } else {
     std::cout << "No loop\n";
     return nullptr;
@@ -388,9 +388,11 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   // Vica: I dont know how to use it. Arg is llvm::Argument type while varTable is llvm::AllocaInst.
   std::map<std::string, std::unique_ptr<Variable>> selfVarTable;
   //
-  for (auto& Arg : func->args())
-    //NamedValues[Arg.getName()] = &Arg;
-    selfVarTable[Arg.getName()] = std::unique_ptr<Variable>(new Variable(Arg.getName(), getTokType(Arg.getType()), nullptr));
+  for (auto& Arg : func->args()) {
+    llvm::AllocaInst* addr = builder.CreateAlloca(Arg.getType(), 0, nullptr, Arg.getName());
+    Assign(addr, &Arg, builder, context);
+    selfVarTable[Arg.getName()] = std::unique_ptr<Variable>(new Variable(Arg.getName(), getTokType(Arg.getType()), addr));
+  }
   for (auto& b : body) {
     b->codegen(builder, selfVarTable, context, module);
   }
