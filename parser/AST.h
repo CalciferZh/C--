@@ -123,9 +123,17 @@ public:
 
   void print() override {
     std::cout << "expression: " << op << " { \nLHS: {\n";
-    LHS->print();
+    if (LHS) {
+      LHS->print();
+    } else {
+      std::cout << "nullptr\n";
+    }
     std::cout << "}\nRHS: {\n";
-    RHS->print();
+    if (RHS) {
+      RHS->print();
+    } else {
+      std::cout << "nullptr\n";
+    }
     std::cout << "}\n}\n";
   }
 
