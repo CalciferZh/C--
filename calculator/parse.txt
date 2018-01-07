@@ -28,7 +28,7 @@ Function: {
             Variable: {
               name: ch
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -52,7 +52,7 @@ Function: {
             Variable: {
               name: ch
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -76,7 +76,7 @@ Function: {
             Variable: {
               name: ch
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -100,7 +100,7 @@ Function: {
             Variable: {
               name: ch
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -124,7 +124,7 @@ Function: {
             Variable: {
               name: ch
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -148,7 +148,7 @@ Function: {
             Variable: {
               name: ch
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -184,14 +184,14 @@ Function: {
       name: rawStr
       size: 128
       init: {
-        String: 1+(5-2)*4/(2+1)
+        String: 1+(52-2)*4/(2+1)
       }
     }
     Declaration for -27: {
       name: rawStrLen
       size: 0
       init: {
-        Integer: 15
+        Integer: 16
       }
     }
     Declaration for -27: {
@@ -286,10 +286,17 @@ Function: {
       }
     }
     Declaration for -27: {
-      name: i
+      name: tmp
       size: 0
       init: {
         None
+      }
+    }
+    Declaration for -27: {
+      name: isLastEleNum
+      size: 0
+      init: {
+        Integer: 0
       }
     }
     expression: -5 {
@@ -300,7 +307,7 @@ Function: {
             Variable: {
               name: opStackHead
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -315,7 +322,7 @@ Function: {
         Variable: {
           name: opStackHead
           offset: {
-            Integer: 0
+            null
           }
         }
       }
@@ -325,7 +332,7 @@ Function: {
             Variable: {
               name: opStackHead
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -342,7 +349,7 @@ Function: {
           Variable: {
             name: rawStrIdx
             offset: {
-              Integer: 0
+              null
             }
           }
         }
@@ -350,7 +357,7 @@ Function: {
           Variable: {
             name: rawStrLen
             offset: {
-              Integer: 0
+              null
             }
           }
         }
@@ -361,7 +368,7 @@ Function: {
             Variable: {
               name: tmpSymbol
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -375,7 +382,7 @@ Function: {
                     Variable: {
                       name: rawStrIdx
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -391,7 +398,7 @@ Function: {
                 Variable: {
                   name: tmpSymbol
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -404,14 +411,9 @@ Function: {
             expression: -5 {
               LHS: {
                 Variable: {
-                  name: exprStack
+                  name: tmp
                   offset: {
-                    Variable: {
-                      name: exprStackHead
-                      offset: {
-                        Integer: 0
-                      }
-                    }
+                    null
                   }
                 }
               }
@@ -424,7 +426,7 @@ Function: {
                         Variable: {
                           name: rawStrIdx
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -436,45 +438,143 @@ Function: {
                 }
               }
             }
-            expression: -5 {
-              LHS: {
+            If-else: {
+              condition: {
                 Variable: {
-                  name: isOpEle
+                  name: isLastEleNum
                   offset: {
-                    Variable: {
-                      name: exprStackHead
-                      offset: {
-                        Integer: 0
-                      }
-                    }
+                    null
                   }
                 }
               }
-              RHS: {
-                Integer: 0
-              }
-            }
-            expression: -5 {
-              LHS: {
-                Variable: {
-                  name: exprStackHead
-                  offset: {
-                    Integer: 0
-                  }
-                }
-              }
-              RHS: {
-                expression: -11 {
+              if body: {
+                expression: -5 {
                   LHS: {
                     Variable: {
-                      name: exprStackHead
+                      name: exprStack
                       offset: {
-                        Integer: 0
+                        expression: -12 {
+                          LHS: {
+                            Variable: {
+                              name: exprStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 1
+                          }
+                        }
                       }
                     }
                   }
                   RHS: {
-                    Integer: 1
+                    expression: -11 {
+                      LHS: {
+                        expression: -13 {
+                          LHS: {
+                            Variable: {
+                              name: exprStack
+                              offset: {
+                                expression: -12 {
+                                  LHS: {
+                                    Variable: {
+                                      name: exprStackHead
+                                      offset: {
+                                        null
+                                      }
+                                    }
+                                  }
+                                  RHS: {
+                                    Integer: 1
+                                  }
+                                }
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 10
+                          }
+                        }
+                      }
+                      RHS: {
+                        Variable: {
+                          name: tmp
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              else body: {
+                expression: -5 {
+                  LHS: {
+                    Variable: {
+                      name: exprStack
+                      offset: {
+                        Variable: {
+                          name: exprStackHead
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                  RHS: {
+                    Variable: {
+                      name: tmp
+                      offset: {
+                        null
+                      }
+                    }
+                  }
+                }
+                expression: -5 {
+                  LHS: {
+                    Variable: {
+                      name: isOpEle
+                      offset: {
+                        Variable: {
+                          name: exprStackHead
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                  RHS: {
+                    Integer: 0
+                  }
+                }
+                expression: -5 {
+                  LHS: {
+                    Variable: {
+                      name: exprStackHead
+                      offset: {
+                        null
+                      }
+                    }
+                  }
+                  RHS: {
+                    expression: -11 {
+                      LHS: {
+                        Variable: {
+                          name: exprStackHead
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                      RHS: {
+                        Integer: 1
+                      }
+                    }
                   }
                 }
               }
@@ -496,7 +596,7 @@ Function: {
                             Variable: {
                               name: tmpSymbol
                               offset: {
-                                Integer: 0
+                                null
                               }
                             }
                           }
@@ -511,7 +611,7 @@ Function: {
                             Variable: {
                               name: tmpSymbol
                               offset: {
-                                Integer: 0
+                                null
                               }
                             }
                           }
@@ -528,7 +628,7 @@ Function: {
                         Variable: {
                           name: tmpSymbol
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -545,7 +645,7 @@ Function: {
                     Variable: {
                       name: tmpSymbol
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -575,34 +675,7 @@ Function: {
                                         Variable: {
                                           name: opStackHead
                                           offset: {
-                                            Integer: 0
-                                          }
-                                        }
-                                      }
-                                      RHS: {
-                                        Integer: 1
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                              RHS: {
-                                Integer: 6
-                              }
-                            }
-                          }
-                          RHS: {
-                            expression: -20 {
-                              LHS: {
-                                Variable: {
-                                  name: opStack
-                                  offset: {
-                                    expression: -12 {
-                                      LHS: {
-                                        Variable: {
-                                          name: opStackHead
-                                          offset: {
-                                            Integer: 0
+                                            null
                                           }
                                         }
                                       }
@@ -618,6 +691,33 @@ Function: {
                               }
                             }
                           }
+                          RHS: {
+                            expression: -20 {
+                              LHS: {
+                                Variable: {
+                                  name: opStack
+                                  offset: {
+                                    expression: -12 {
+                                      LHS: {
+                                        Variable: {
+                                          name: opStackHead
+                                          offset: {
+                                            null
+                                          }
+                                        }
+                                      }
+                                      RHS: {
+                                        Integer: 1
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              RHS: {
+                                Integer: 6
+                              }
+                            }
+                          }
                         }
                       }
                       RHS: {
@@ -626,7 +726,7 @@ Function: {
                             Variable: {
                               name: tmpSymbol
                               offset: {
-                                Integer: 0
+                                null
                               }
                             }
                           }
@@ -643,7 +743,7 @@ Function: {
                         Variable: {
                           name: tmpSymbol
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -663,7 +763,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -673,7 +773,7 @@ Function: {
                     Variable: {
                       name: tmpSymbol
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -683,7 +783,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -693,7 +793,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -710,7 +810,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -720,7 +820,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -738,7 +838,7 @@ Function: {
                         Variable: {
                           name: exprStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -751,7 +851,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -766,7 +866,7 @@ Function: {
                         Variable: {
                           name: exprStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -781,7 +881,7 @@ Function: {
                     Variable: {
                       name: exprStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -791,7 +891,7 @@ Function: {
                         Variable: {
                           name: exprStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -809,7 +909,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -819,7 +919,7 @@ Function: {
                     Variable: {
                       name: tmpSymbol
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -829,7 +929,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -839,7 +939,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -862,7 +962,7 @@ Function: {
                 Variable: {
                   name: tmpSymbol
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -880,7 +980,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -890,7 +990,7 @@ Function: {
                 Variable: {
                   name: tmpSymbol
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -900,7 +1000,7 @@ Function: {
                 Variable: {
                   name: opStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -910,7 +1010,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -931,7 +1031,7 @@ Function: {
                 Variable: {
                   name: tmpSymbol
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -946,7 +1046,7 @@ Function: {
                 Variable: {
                   name: opStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -956,7 +1056,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -976,7 +1076,7 @@ Function: {
                       Variable: {
                         name: opStackHead
                         offset: {
-                          Integer: 0
+                          null
                         }
                       }
                     }
@@ -995,7 +1095,7 @@ Function: {
                         Variable: {
                           name: exprStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1008,7 +1108,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1023,7 +1123,7 @@ Function: {
                         Variable: {
                           name: exprStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1038,7 +1138,7 @@ Function: {
                     Variable: {
                       name: exprStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1048,7 +1148,7 @@ Function: {
                         Variable: {
                           name: exprStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1063,7 +1163,7 @@ Function: {
                     Variable: {
                       name: opStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1073,7 +1173,7 @@ Function: {
                         Variable: {
                           name: opStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1094,7 +1194,7 @@ Function: {
             Variable: {
               name: rawStrIdx
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -1104,12 +1204,59 @@ Function: {
                 Variable: {
                   name: rawStrIdx
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
               RHS: {
                 Integer: 1
+              }
+            }
+          }
+        }
+        If-else: {
+          condition: {
+            expression: -20 {
+              LHS: {
+                Variable: {
+                  name: tmpSymbol
+                  offset: {
+                    null
+                  }
+                }
+              }
+              RHS: {
+                Integer: 0
+              }
+            }
+          }
+          if body: {
+            expression: -5 {
+              LHS: {
+                Variable: {
+                  name: isLastEleNum
+                  offset: {
+                    null
+                  }
+                }
+              }
+              RHS: {
+                Integer: 1
+              }
+            }
+          }
+          else body: {
+            expression: -5 {
+              LHS: {
+                Variable: {
+                  name: isLastEleNum
+                  offset: {
+                    null
+                  }
+                }
+              }
+              RHS: {
+                Integer: 0
               }
             }
           }
@@ -1123,7 +1270,7 @@ Function: {
           Variable: {
             name: opStackHead
             offset: {
-              Integer: 0
+              null
             }
           }
         }
@@ -1137,7 +1284,7 @@ Function: {
             Variable: {
               name: opStackHead
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -1147,7 +1294,7 @@ Function: {
                 Variable: {
                   name: opStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1165,7 +1312,7 @@ Function: {
                 Variable: {
                   name: exprStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1178,7 +1325,7 @@ Function: {
                 Variable: {
                   name: opStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1193,7 +1340,7 @@ Function: {
                 Variable: {
                   name: exprStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1208,7 +1355,7 @@ Function: {
             Variable: {
               name: exprStackHead
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -1218,7 +1365,7 @@ Function: {
                 Variable: {
                   name: exprStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1237,7 +1384,7 @@ Function: {
           Variable: {
             name: exprStackIdx
             offset: {
-              Integer: 0
+              null
             }
           }
         }
@@ -1245,7 +1392,7 @@ Function: {
           Variable: {
             name: exprStackHead
             offset: {
-              Integer: 0
+              null
             }
           }
         }
@@ -1259,7 +1406,7 @@ Function: {
                 Variable: {
                   name: exprStackIdx
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1271,7 +1418,7 @@ Function: {
                 Variable: {
                   name: rhs
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1284,7 +1431,7 @@ Function: {
                         Variable: {
                           name: numStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1301,7 +1448,7 @@ Function: {
                 Variable: {
                   name: lhs
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1314,7 +1461,7 @@ Function: {
                         Variable: {
                           name: numStackHead
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1331,7 +1478,7 @@ Function: {
                 Variable: {
                   name: numStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1341,7 +1488,7 @@ Function: {
                     Variable: {
                       name: numStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1361,7 +1508,7 @@ Function: {
                         Variable: {
                           name: exprStackIdx
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1378,7 +1525,7 @@ Function: {
                     Variable: {
                       name: res
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1388,7 +1535,7 @@ Function: {
                         Variable: {
                           name: lhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1396,7 +1543,7 @@ Function: {
                         Variable: {
                           name: rhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1417,7 +1564,7 @@ Function: {
                         Variable: {
                           name: exprStackIdx
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1434,7 +1581,7 @@ Function: {
                     Variable: {
                       name: res
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1444,7 +1591,7 @@ Function: {
                         Variable: {
                           name: lhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1452,7 +1599,7 @@ Function: {
                         Variable: {
                           name: rhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1473,7 +1620,7 @@ Function: {
                         Variable: {
                           name: exprStackIdx
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1490,7 +1637,7 @@ Function: {
                     Variable: {
                       name: res
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1500,7 +1647,7 @@ Function: {
                         Variable: {
                           name: lhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1508,7 +1655,7 @@ Function: {
                         Variable: {
                           name: rhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1529,7 +1676,7 @@ Function: {
                         Variable: {
                           name: exprStackIdx
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1546,7 +1693,7 @@ Function: {
                     Variable: {
                       name: res
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1556,7 +1703,7 @@ Function: {
                         Variable: {
                           name: lhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1564,7 +1711,7 @@ Function: {
                         Variable: {
                           name: rhs
                           offset: {
-                            Integer: 0
+                            null
                           }
                         }
                       }
@@ -1583,7 +1730,7 @@ Function: {
                     Variable: {
                       name: numStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1593,7 +1740,7 @@ Function: {
                 Variable: {
                   name: res
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1603,7 +1750,7 @@ Function: {
                 Variable: {
                   name: numStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1613,7 +1760,7 @@ Function: {
                     Variable: {
                       name: numStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1633,7 +1780,7 @@ Function: {
                     Variable: {
                       name: numStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1646,7 +1793,7 @@ Function: {
                     Variable: {
                       name: exprStackIdx
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1658,7 +1805,7 @@ Function: {
                 Variable: {
                   name: numStackHead
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1668,7 +1815,7 @@ Function: {
                     Variable: {
                       name: numStackHead
                       offset: {
-                        Integer: 0
+                        null
                       }
                     }
                   }
@@ -1685,7 +1832,7 @@ Function: {
             Variable: {
               name: exprStackIdx
               offset: {
-                Integer: 0
+                null
               }
             }
           }
@@ -1695,7 +1842,7 @@ Function: {
                 Variable: {
                   name: exprStackIdx
                   offset: {
-                    Integer: 0
+                    null
                   }
                 }
               }
@@ -1723,4 +1870,3 @@ Function: {
     }
   }
 }
-

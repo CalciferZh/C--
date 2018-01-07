@@ -102,7 +102,7 @@ public:
 
   std::unique_ptr<ExprAST> offset;
 
-  VariableExprAST(const std::string& name) : name(name), offset(llvm::make_unique<IntExprAST>(0)) {}
+  VariableExprAST(const std::string& name) : name(name), offset(nullptr) {}
 
   VariableExprAST(const std::string& name, std::unique_ptr<ExprAST> offset) : name(name), offset(std::move(offset)) {}
 
@@ -112,7 +112,11 @@ public:
     std::cout << "name: " << name << '\n';
 
     std::cout << "offset: {\n";
-    offset->print();
+    if (offset) {
+      offset->print();
+    } else {
+      std::cout << "null\n";
+    }
     std::cout << "}\n}\n";
   }
 
@@ -134,9 +138,17 @@ public:
 
   void print() override {
     std::cout << "expression: " << op << " { \nLHS: {\n";
-    LHS->print();
+    if (LHS) {
+      LHS->print();
+    } else {
+      std::cout << "nullptr\n";
+    }
     std::cout << "}\nRHS: {\n";
-    RHS->print();
+    if (RHS) {
+      RHS->print();
+    } else {
+      std::cout << "nullptr\n";
+    }
     std::cout << "}\n}\n";
   }
 
