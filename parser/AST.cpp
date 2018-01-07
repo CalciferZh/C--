@@ -4,6 +4,8 @@
 // Vica: this is so dirty...
 static llvm::BasicBlock* breakWhile = nullptr;
 
+#define NOOUPUT if(false)
+
 llvm::Type* getLLVMType(int tok_type, llvm::LLVMContext& context) {
   llvm::Type* type;
   switch(tok_type) {
@@ -35,27 +37,27 @@ int getTokType(llvm::Type* type) {
 }
 
 llvm::Value* RealExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: RealExpr\n";
+  NOOUPUT std::cout << "Generating: RealExpr\n";
   return llvm::ConstantFP::get(context, llvm::APFloat(val));
 }
 
 llvm::Value* IntExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: IntExpr\n";
+  NOOUPUT std::cout << "Generating: IntExpr\n";
   return llvm::ConstantInt::get(context, llvm::APInt(32, val, true));
 }
 
 llvm::Value* StringExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: StringExpr\n";
+  NOOUPUT std::cout << "Generating: StringExpr\n";
   return builder.CreateGlobalStringPtr(val);
 }
 
 llvm::Value* CharExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: CharExpr\n";
+  NOOUPUT std::cout << "Generating: CharExpr\n";
   return llvm::ConstantInt::get(context, llvm::APInt(8, val, true));
 }
 
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: VariableExpr\n";
+  NOOUPUT std::cout << "Generating: VariableExpr\n";
   if (offset == nullptr){
     return builder.CreateLoad(varTable[name]->addr, name.c_str());
   } else {
@@ -67,7 +69,7 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: BinaryExpr\n";
+  NOOUPUT std::cout << "Generating: BinaryExpr\n";
   if (op == tok_assignOp) { // assign is special 
     if (LHS->getClassType() != 5) {
       std::cout << "lvalue should be variable\n";
@@ -161,7 +163,7 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: DeclareExpr\n";
+  NOOUPUT std::cout << "Generating: DeclareExpr\n";
   if (varTable.find(name) != varTable.end()) {
     std::cout << "Variable redefinition\n";
     return nullptr;
@@ -212,13 +214,13 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* IfExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: IfExpr\n";
+  NOOUPUT std::cout << "Generating: IfExpr\n";
   llvm::Value* CondV = cond->codegen(builder, varTable, context, module);
   if (!CondV) {
     std::cout << "Error in condition\n";
     return nullptr;
   }
-  CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "ifcond");
+  // CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "ifcond");
   // Vica: why use function here?
   llvm::Function* func = builder.GetInsertBlock()->getParent();
   // Create blocks for the then and else cases.  Insert the 'then' block at the end of the function.
@@ -265,14 +267,14 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   // Emit merge block.
   //func->getBasicBlockList().push_back(MergeBB);
   builder.SetInsertPoint(MergeBB);
-  llvm::PHINode *PN = builder.CreatePHI(llvm::Type::getDoubleTy(context), 2, "iftmp");
+  llvm::PHINode *PN = builder.CreatePHI(llvm::Type::getInt32Ty(context), 2, "iftmp");
   PN->addIncoming(firstThenV, ThenBB);
   PN->addIncoming(firstElseV, ElseBB);
   return PN;
 }
 
 llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: WhileExpr\n";
+  NOOUPUT std::cout << "Generating: WhileExpr\n";
   llvm::Function* func = builder.GetInsertBlock()->getParent();
   llvm::BasicBlock* CondBB = llvm::BasicBlock::Create(context, "whilecond", func);
   llvm::BasicBlock* BodyBB = llvm::BasicBlock::Create(context, "whilebody", func);
@@ -286,7 +288,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
     std::cout << "Error in condition\n";
     return nullptr;
   }
-  CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "whilecondtmp");
+  // CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "whilecondtmp");
   builder.CreateCondBr(CondV, BodyBB, FiniBB);
   CondBB = builder.GetInsertBlock();
   // Emit body value
@@ -307,12 +309,12 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* ReturnExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: ReturnExpr\n";
+  NOOUPUT std::cout << "Generating: ReturnExpr\n";
   return builder.CreateRet(retExpr->codegen(builder, varTable, context, module));
 }
 
 llvm::Value* CallExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: CallExpr\n";
+  NOOUPUT std::cout << "Generating: CallExpr\n";
   // Vica: need to get the func
   llvm::Function* func = module->getFunction(callee);
   if (!func) {
@@ -334,7 +336,7 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: BreakExpr\n";
+  NOOUPUT std::cout << "Generating: BreakExpr\n";
   if (breakWhile) {
     return builder.CreateBr(breakWhile);
   } else {
@@ -344,7 +346,7 @@ llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
 }
 
 llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: Prototype\n";
+  NOOUPUT std::cout << "Generating: Prototype\n";
   // Make the function type:  double(double,double) etc.
 
   std::vector<llvm::Type*> types;
@@ -364,7 +366,7 @@ llvm::Function* PrototypeAST::codegen(CODEGENPARM) {
 }
 
 llvm::Function* FunctionAST::codegen(CODEGENPARM) {
-  std::cout << "Generating: Function\n";
+  NOOUPUT std::cout << "Generating: Function\n";
   // First, check for an existing function from a previous 'extern' declaration.
   llvm::Function* func = module->getFunction(proto->name);
 
