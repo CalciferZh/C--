@@ -301,6 +301,10 @@ public:
       expr->print();
     }
   }
+
+  llvm::Value* codegen(CODEGENPARM) override { return nullptr; }
+
+  int getClassType() override { return 13; }
 };
 
 class PrototypeAST {

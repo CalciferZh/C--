@@ -199,26 +199,43 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
     llvm::AllocaInst* addr = builder.CreateAlloca(type, 0, nullptr, name.c_str());
     varTable[name] = std::unique_ptr<Variable>(new Variable(name, tp, addr));
   }
-  if (init) {
-    llvm::Value* R = init->codegen(builder, varTable, context, module);
-    // Vica: Since we have create globle string, now we gonna try to figure out how to extern 'puts'
-    if (size != 0) {
-      if (init->getClassType() == 3) {
+  if (init) { // has rvalue
+    if (size != 0) { // about array
+      if (init->getClassType() == 3) { // string
         StringExprAST* str = static_cast<StringExprAST*>(init.get());
         if (str) {
-          if (unsigned(size) < str->val.length()) {
+          if (unsigned(size) < str->val.length() + 1) {
             std::cout << "Too long\n";
             return nullptr;
           }
+          llvm::Value* R = init->codegen(builder, varTable, context, module);
           llvm::Value* L = builder.CreateBitCast(varTable[name]->addr, llvm::Type::getInt8PtrTy(context));
           builder.CreateMemCpy(L, R, str->val.length() + 1, 1, false);
+          return varTable[name]->addr;
+        }
+      } else { // other array
+        if (init->getClassType() == 12) {
+          InitListExprAST* list = static_cast<InitListExprAST*>(init.get());
+          if (unsigned(size) < list->initList.size()) {
+            std::cout << "Too many init\n";
+            return nullptr;
+          }
+          unsigned idx = 0;
+          for (auto& expr : list->initList) {
+            llvm::Value* indexList[2] = {llvm::ConstantInt::get(context, llvm::APInt(32, 0, true)), llvm::ConstantInt::get(context, llvm::APInt(32, idx, true))};
+            llvm::Value* L = builder.CreateInBoundsGEP(varTable[name]->addr, indexList);
+            llvm::Value* R = expr->codegen(builder, varTable, context, module);
+            Assign(L, R, builder, context);
+            idx++;
+          }
+          return varTable[name]->addr;
         }
       }
-      // Vica: how to init an array? 
-    } else {
+    } else { // single type
+      llvm::Value* R = init->codegen(builder, varTable, context, module);
       Assign(varTable[name]->addr, R, builder, context);
+      return varTable[name]->addr;
     }
-    return R;
   } else {
     return varTable[name]->addr;
   }
