@@ -9,7 +9,7 @@ std::unique_ptr<ExprAST> Parser::parseIntExpr() {
 
 std::unique_ptr<ExprAST> Parser::parseRealExpr() {
   // std::cout << "Parsing real expresion." << '\n';
-  auto result = llvm::make_unique<RealExprAST>(std::stoi(tkStream[curIdx].val));
+  auto result = llvm::make_unique<RealExprAST>(std::stod(tkStream[curIdx].val));
   ++curIdx;
   return std::move(result);
 }
