@@ -98,15 +98,6 @@ int main() {
     } else {
       isLastEleNum = 0;
     }
-
-    // printf("=================================================\n");
-    // for (tmp = 0; tmp < exprStackHead; ++tmp) {
-    //   printf("%d %d\n", exprStack[tmp], isOpEle[tmp]);
-    // }
-    // printf("-------------------------------------------------\n");
-    // for (tmp = 0; tmp < opStackHead; ++tmp) {
-    //   printf("%d\n", opStack[tmp]);
-    // }
   }
 
   // we use 1 since opStack[0] is '('
@@ -116,11 +107,6 @@ int main() {
     isOpEle[exprStackHead] = 1;
     exprStackHead = exprStackHead + 1;
   }
-
-  // printf("=================================================\n");
-  // for (tmp = 0; tmp < exprStackHead; ++tmp) {
-  //   printf("%d %d\n", exprStack[tmp], isOpEle[tmp]);
-  // }
 
   while (exprStackIdx != exprStackHead) {
     if (isOpEle[exprStackIdx]) {
