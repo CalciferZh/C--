@@ -1,18 +1,6 @@
 Function: {
   prototype: {
     Function prototype: {
-      name: printd
-      args:
-      (-29)val
-      return type: -32
-    }
-  }
-  body: {}
-}
-
-Function: {
-  prototype: {
-    Function prototype: {
       name: isOp
       args:
       (-33)ch
@@ -41,7 +29,8 @@ Function: {
           Integer: 1
         }
       }
-      else body: {}
+      else body: {
+      }
     }
     If-else: {
       condition: {
@@ -64,7 +53,8 @@ Function: {
           Integer: 2
         }
       }
-      else body: {}
+      else body: {
+      }
     }
     If-else: {
       condition: {
@@ -87,7 +77,8 @@ Function: {
           Integer: 3
         }
       }
-      else body: {}
+      else body: {
+      }
     }
     If-else: {
       condition: {
@@ -110,7 +101,8 @@ Function: {
           Integer: 4
         }
       }
-      else body: {}
+      else body: {
+      }
     }
     If-else: {
       condition: {
@@ -133,7 +125,8 @@ Function: {
           Integer: 5
         }
       }
-      else body: {}
+      else body: {
+      }
     }
     If-else: {
       condition: {
@@ -156,7 +149,8 @@ Function: {
           Integer: 6
         }
       }
-      else body: {}
+      else body: {
+      }
     }
     return: {
       Integer: 0
@@ -177,14 +171,42 @@ Function: {
       name: rawStr
       size: 128
       init: {
-        String: 1+5/5*5
+        None
+      }
+    }
+    Call: {
+      callee: printf
+      params: {
+        String: expression:
+      }
+    }
+    Call: {
+      callee: scanf
+      params: {
+        String: %s
+        Variable: {
+          name: rawStr
+          offset: {
+            null
+          }
+        }
       }
     }
     Declaration for -27: {
       name: rawStrLen
       size: 0
       init: {
-        Integer: 7
+        Call: {
+          callee: strlen
+          params: {
+            Variable: {
+              name: rawStr
+              offset: {
+                null
+              }
+            }
+          }
+        }
       }
     }
     Declaration for -27: {
@@ -381,7 +403,7 @@ Function: {
           }
         }
       }
-      body: {
+      body:{
         expression: -5 {
           LHS: {
             Variable: {
@@ -606,7 +628,8 @@ Function: {
               }
             }
           }
-          else body: {}
+          else body: {
+          }
         }
         If-else: {
           condition: {
@@ -1089,7 +1112,8 @@ Function: {
               }
             }
           }
-          else body: {}
+          else body: {
+          }
         }
         If-else: {
           condition: {
@@ -1157,7 +1181,8 @@ Function: {
               }
             }
           }
-          else body: {}
+          else body: {
+          }
         }
         If-else: {
           condition: {
@@ -1221,7 +1246,7 @@ Function: {
                   Integer: 5
                 }
               }
-              body: {
+              body:{
                 expression: -5 {
                   LHS: {
                     Variable: {
@@ -1321,7 +1346,8 @@ Function: {
               }
             }
           }
-          else body: {}
+          else body: {
+          }
         }
         expression: -5 {
           LHS: {
@@ -1412,7 +1438,7 @@ Function: {
           Integer: 1
         }
       }
-      body: {
+      body:{
         expression: -5 {
           LHS: {
             Variable: {
@@ -1531,7 +1557,7 @@ Function: {
           }
         }
       }
-      body: {
+      body:{
         If-else: {
           condition: {
             expression: -20 {
@@ -1692,7 +1718,8 @@ Function: {
                   }
                 }
               }
-              else body: {}
+              else body: {
+              }
             }
             If-else: {
               condition: {
@@ -1747,7 +1774,8 @@ Function: {
                   }
                 }
               }
-              else body: {}
+              else body: {
+              }
             }
             If-else: {
               condition: {
@@ -1802,7 +1830,8 @@ Function: {
                   }
                 }
               }
-              else body: {}
+              else body: {
+              }
             }
             If-else: {
               condition: {
@@ -1857,7 +1886,8 @@ Function: {
                   }
                 }
               }
-              else body: {}
+              else body: {
+              }
             }
             expression: -5 {
               LHS: {
@@ -1992,8 +2022,9 @@ Function: {
       }
     }
     Call: {
-      callee: printd
+      callee: printf
       params: {
+        String: result: %f\n
         Variable: {
           name: numStack
           offset: {
