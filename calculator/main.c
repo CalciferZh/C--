@@ -1,5 +1,5 @@
-extern void printd(double val);
-// #include <stdio.h>
+// extern void printd(double val);
+#include <stdio.h>
 
 int isOp(char ch) {
   if (ch == '+') {
@@ -24,9 +24,16 @@ int isOp(char ch) {
 }
 
 int main() {
-  char rawStr[128] = "1+(52-2)*4/(2+1)";
-  int rawStrLen = 16;
+  char rawStr[128] = "1+5/5*5";
+  int rawStrLen = 7;
   int rawStrIdx = 0;
+
+  int prec[7];
+  prec[0] = 0;
+  prec[1] = 1;
+  prec[2] = 1;
+  prec[3] = 2;
+  prec[4] = 2;
 
   // polish expression
   int exprStack[128];
@@ -49,6 +56,9 @@ int main() {
   int tmp;
   int isLastEleNum = 0;
 
+  int precInStack;
+  int precOutStack;
+
   opStack[opStackHead] = 5;
   opStackHead = opStackHead + 1;
 
@@ -56,7 +66,7 @@ int main() {
     tmpSymbol = isOp(rawStr[rawStrIdx]);
     if (tmpSymbol == 0) {
       tmp = rawStr[rawStrIdx] - '0';
-      if (isLastEleNum) {
+      if (isLastEleNum == 1) {
         // if last element is also a number
         // the two number should be 'combined'
         exprStack[exprStackHead - 1] = exprStack[exprStackHead - 1] * 10 + tmp;
@@ -67,16 +77,24 @@ int main() {
       }
     }
     if (tmpSymbol == 1 || tmpSymbol == 2 || tmpSymbol == 3 || tmpSymbol == 4) {
-      if (opStack[opStackHead - 1] == 5 || opStack[opStackHead - 1] == 6 || tmpSymbol == 3 || tmpSymbol == 4) {
+      if (opStack[opStackHead - 1] == 5 || opStack[opStackHead - 1] == 6) {
         opStack[opStackHead] = tmpSymbol;
         opStackHead = opStackHead + 1;
       } else {
-        opStackHead = opStackHead - 1;
-        exprStack[exprStackHead] = opStack[opStackHead];
-        isOpEle[exprStackHead] = 1;
-        exprStackHead = exprStackHead + 1;
-        opStack[opStackHead] = tmpSymbol;
-        opStackHead = opStackHead + 1;
+        tmp = opStack[opStackHead - 1];
+        precInStack = prec[tmp];
+        precOutStack = prec[tmpSymbol];
+        if (precOutStack > precInStack) {
+          opStack[opStackHead] = tmpSymbol;
+          opStackHead = opStackHead + 1;
+        } else {
+          opStackHead = opStackHead - 1;
+          exprStack[exprStackHead] = opStack[opStackHead];
+          isOpEle[exprStackHead] = 1;
+          exprStackHead = exprStackHead + 1;
+          opStack[opStackHead] = tmpSymbol;
+          opStackHead = opStackHead + 1;
+        }
       }
     }
     if (tmpSymbol == 5) {
@@ -109,7 +127,7 @@ int main() {
   }
 
   while (exprStackIdx != exprStackHead) {
-    if (isOpEle[exprStackIdx]) {
+    if (isOpEle[exprStackIdx] == 1) {
       rhs = numStack[numStackHead - 1];
       lhs = numStack[numStackHead - 2];
       numStackHead = numStackHead - 2;
@@ -133,8 +151,8 @@ int main() {
     }
     exprStackIdx = exprStackIdx + 1;
   }
-  printd(numStack[0]);
-  // printf("%f", numStack[0]);
+  // printd(numStack[0]);
+  printf("%f", numStack[0]);
   return 0;
 }
 
