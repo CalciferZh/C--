@@ -36,6 +36,28 @@ int getTokType(llvm::Type* type) {
   return 0;
 }
 
+llvm::Value* Assign(llvm::Value* L, llvm::Value* R, llvm::IRBuilder<>& builder, llvm::LLVMContext& context) {
+  llvm::Type* lType = L->getType();
+  if (lType->isPointerTy())
+    lType = lType->getContainedType(0);
+  if (lType->isDoubleTy()  && !R->getType()->isDoubleTy()) {
+    R = builder.CreateSIToFP(R, llvm::Type::getDoubleTy(context));
+  }
+  if (lType->isIntegerTy() && !R->getType()->isIntegerTy(lType->getIntegerBitWidth())) {
+    if (R->getType()->isDoubleTy())
+      R = builder.CreateFPToSI(R, lType);
+    else {
+      if (lType->getIntegerBitWidth() < R->getType()->getIntegerBitWidth())
+        R = builder.CreateTrunc(R, lType);
+      else 
+        R = builder.CreateSExt(R, lType);
+    }
+  }
+  //std::cout<<"lhs: " << lType->getTypeID() << " rhs: " << R->getType()->getTypeID() << std::endl;
+  //std::cout<<"lhs.weight: " << lType->getIntegerBitWidth() << " rhs.weight: " << R->getType()->getIntegerBitWidth() << std::endl;
+  return builder.CreateStore(R, L, false);
+}
+
 llvm::Value* RealExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: RealExpr\n";
   return llvm::ConstantFP::get(context, llvm::APFloat(val));
@@ -59,10 +81,15 @@ llvm::Value* CharExprAST::codegen(CODEGENPARM) {
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: VariableExpr\n";
   if (offset == nullptr){
-    return builder.CreateLoad(varTable[name]->addr, name.c_str());
+    if (varTable[name]->tp == tok_stringType) {
+      llvm::Value* indexList[2] = {llvm::ConstantInt::get(context, llvm::APInt(32, 0, true)), llvm::ConstantInt::get(context, llvm::APInt(32, 0, true))};
+      return builder.CreateInBoundsGEP(varTable[name]->addr, indexList);
+    } else {
+      return builder.CreateLoad(varTable[name]->addr, name.c_str());
+    }
   } else {
     llvm::Value* len = offset->codegen(builder, varTable, context, module);
-    llvm::Value* indexList[2] = {llvm::ConstantInt::get(len->getType(), 0), len};
+    llvm::Value* indexList[2] = {llvm::ConstantInt::get(context, llvm::APInt(32, 0, true)), len};
     llvm::Value* ptr = builder.CreateInBoundsGEP(varTable[name]->addr, indexList);
     return builder.CreateLoad(ptr, name.c_str());
   }
@@ -81,27 +108,18 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
       L = varTable[lhs->name]->addr;
     else {
       llvm::Value* len = lhs->offset->codegen(builder, varTable, context, module);
-      llvm::Value* indexList[2] = {llvm::ConstantInt::get(len->getType(), 0), len};
+      llvm::Value* indexList[2] = {llvm::ConstantInt::get(context, llvm::APInt(32, 0, true)), len};
       L = builder.CreateInBoundsGEP(varTable[lhs->name]->addr, indexList);
     }
     llvm::Value* R = RHS->codegen(builder, varTable, context, module);
-    llvm::Type* lType = L->getType();
-    if (lType->isPointerTy())
-      lType = lType->getContainedType(0);
-    if (lType->isDoubleTy()  && !R->getType()->isDoubleTy()) {
-      R = builder.CreateSIToFP(R, llvm::Type::getDoubleTy(context));
-    }
-    if (lType->isIntegerTy() && R->getType()->isDoubleTy()) {
-      R = builder.CreateFPToSI(R, llvm::Type::getInt32Ty(context));
-    }
-    std::cout<<"lhs: " << lType->getTypeID() << " rhs: " << R->getType()->getTypeID() << std::endl;
-    // vica: need change type maybe
-    return builder.CreateStore(R, L, false);
+    return Assign(L, R, builder, context);
   }
   llvm::Value* L = LHS->codegen(builder, varTable, context, module);
   llvm::Value* R = RHS->codegen(builder, varTable, context, module);
-  if (!L || !R)
+  if (!L || !R) {
+    std::cout << "L or R fail in binaryexpr\n";
     return nullptr;
+  }
   bool isFloat = L->getType()->isDoubleTy() || L->getType()->isDoubleTy();
   if (op == tok_logicAndOp || op == tok_logicOrOp) { // change to UI int1
     if (L->getType()->isDoubleTy()) {
@@ -175,6 +193,8 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
     }
     if (size != 0) {
       type = llvm::ArrayType::get(type, size);
+      if (tp == tok_charType)
+        tp =tok_stringType;
     }
     llvm::AllocaInst* addr = builder.CreateAlloca(type, 0, nullptr, name.c_str());
     varTable[name] = std::unique_ptr<Variable>(new Variable(name, tp, addr));
@@ -182,34 +202,25 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
   if (init) {
     llvm::Value* R = init->codegen(builder, varTable, context, module);
     // Vica: Since we have create globle string, now we gonna try to figure out how to extern 'puts'
-    if (!R && init->getClassType() != 3) { // Vica: R==nullptr is acceptable only if stringexpr
-      std::cout << "Invalid expression\n";
-      return nullptr;
-    }
     if (size != 0) {
       if (init->getClassType() == 3) {
-        // Vica: Both dynamic_cast and llvm::dyn_cast fail.. wtf
         StringExprAST* str = static_cast<StringExprAST*>(init.get());
         if (str) {
           if (unsigned(size) < str->val.length()) {
             std::cout << "Too long\n";
             return nullptr;
           }
-          unsigned int idx = 0;
-          for (auto c : str->val) {
-            llvm::Value* loc = builder.CreateInBoundsGEP(varTable[name]->addr, llvm::ConstantInt::get(context, llvm::APInt(32, idx, true)));
-            builder.CreateStore(llvm::ConstantInt::get(context, llvm::APInt(8, int(c), true)), loc);
-            idx++;
-          }
+          llvm::Value* L = builder.CreateBitCast(varTable[name]->addr, llvm::Type::getInt8PtrTy(context));
+          builder.CreateMemCpy(L, R, str->val.length() + 1, 1, false);
         }
       }
       // Vica: how to init an array? 
     } else {
-      builder.CreateStore(R, varTable[name]->addr);
+      Assign(varTable[name]->addr, R, builder, context);
     }
     return R;
   } else {
-    return nullptr;
+    return varTable[name]->addr;
   }
 }
 
@@ -230,15 +241,8 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   builder.CreateCondBr(CondV, ThenBB, ElseBB);
   // Emit then value.
   builder.SetInsertPoint(ThenBB);
-  bool firstThen = true, firstElse = true;
-  llvm::Value* firstThenV = nullptr;
-  llvm::Value* firstElseV = nullptr;
   for (auto& then : ifBody) {
     llvm::Value* ThenV = then->codegen(builder, varTable, context, module);
-    if (firstThen) {
-      firstThenV = ThenV;
-      firstThen = false;
-    }
     if (!ThenV) {
       std::cout << "Error in then\n";
       return nullptr;
@@ -252,25 +256,18 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   builder.SetInsertPoint(ElseBB);
   for (auto& elsse : elseBody) {
     llvm::Value *ElseV = elsse->codegen(builder, varTable, context, module);
-    if (firstElse) {
-      firstElseV = ElseV;
-      firstElse = false;
-    }
     if (!ElseV) {
       std::cout << "Error in else\n";
       return nullptr;
     }
   }
-  builder.CreateBr(MergeBB);
+  llvm::Value* merge = builder.CreateBr(MergeBB);
   // codegen of 'Else' can change the current block, update ElseBB for the PHI.
   ElseBB = builder.GetInsertBlock();
   // Emit merge block.
   //func->getBasicBlockList().push_back(MergeBB);
   builder.SetInsertPoint(MergeBB);
-  llvm::PHINode *PN = builder.CreatePHI(llvm::Type::getInt32Ty(context), 2, "iftmp");
-  PN->addIncoming(firstThenV, ThenBB);
-  PN->addIncoming(firstElseV, ElseBB);
-  return PN;
+  return merge;
 }
 
 llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
@@ -300,12 +297,12 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
         return nullptr;
       }
   }
-  builder.CreateBr(CondBB);
+  llvm::Value* ret = builder.CreateBr(CondBB);
   BodyBB = builder.GetInsertBlock();
   builder.SetInsertPoint(FiniBB);
   breakWhile = nullptr;
   // Vica: What should I return?
-  return nullptr;
+  return ret;
 }
 
 llvm::Value* ReturnExprAST::codegen(CODEGENPARM) {
@@ -373,8 +370,11 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
   if (!func)
     func = proto->codegen(builder, varTable, context, module);
 
-  if (!func)
+  if (!func) {
+    std::cout << "Generating: Function Fail\n";
     return nullptr;
+  }
+
   if (body.empty()) { // just a declaration
     return func;
   }

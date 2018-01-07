@@ -48,6 +48,9 @@ public:
     module(llvm::make_unique<llvm::Module>("gg myfriend", context)) {
       llvm::FunctionType* FT = llvm::FunctionType::get(llvm::IntegerType::getInt32Ty(context), llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0), true);
       module->getOrInsertFunction("printf", FT);
+      module->getOrInsertFunction("scanf", FT);
+      FT = llvm::FunctionType::get(llvm::IntegerType::getInt64Ty(context), llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0), false);
+      module->getOrInsertFunction("strlen", FT);
     }
 
   void parse();

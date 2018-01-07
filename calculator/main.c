@@ -1,31 +1,7 @@
-extern void printd(double val);
-// #include <stdio.h>
-
-int isOp(char ch) {
-//  if (ch == '+') {
-//    return 1;
-//  }
-//  if (ch == '-') {
-//    return 2;
-//  }
-//  if (ch == '*') {
-//    return 3;
-//  }
-//  if (ch == '/') {
-//    return 4;
-//  }
-//  if (ch == '(') {
-//    return 5;
-//  }
-//  if (ch == ')') {
-//    return 6;
-//  }
-  return 0;
-}
-
 int main() {
-  char rawStr[128] = "1+(52-2)*4/(2+1)";
-  int rawStrLen = 16;
+  char rawStr[128];
+  scanf("%s", rawStr);
+  int rawStrLen = strlen(rawStr);
   int rawStrIdx = 0;
 
   // polish expression
@@ -48,15 +24,35 @@ int main() {
 
   int tmp;
   int isLastEleNum = 0;
+  char ch;
 
   opStack[opStackHead] = 5;
   opStackHead = opStackHead + 1;
 
   while (rawStrIdx < rawStrLen) {
-    tmpSymbol = isOp(rawStr[rawStrIdx]);
+    ch = rawStr[rawStrIdx];
+    tmpSymbol = 0;
+    if (ch == '+') {
+      tmpSymbol = 1;
+    }
+    if (ch == '-') {
+      tmpSymbol = 2;
+    }
+    if (ch == '*') {
+      tmpSymbol = 3;
+    }
+    if (ch == '/') {
+      tmpSymbol = 4;
+    }
+    if (ch == '(') {
+      tmpSymbol = 5;
+    }
+    if (ch == ')') {
+      tmpSymbol = 6;
+    }
     if (tmpSymbol == 0) {
       tmp = rawStr[rawStrIdx] - '0';
-      if (isLastEleNum) {
+      if (isLastEleNum != 0) {
         // if last element is also a number
         // the two number should be 'combined'
         exprStack[exprStackHead - 1] = exprStack[exprStackHead - 1] * 10 + tmp;
@@ -109,7 +105,7 @@ int main() {
   }
 
   while (exprStackIdx != exprStackHead) {
-    if (isOpEle[exprStackIdx]) {
+    if (isOpEle[exprStackIdx] != 0) {
       rhs = numStack[numStackHead - 1];
       lhs = numStack[numStackHead - 2];
       numStackHead = numStackHead - 2;
@@ -133,8 +129,7 @@ int main() {
     }
     exprStackIdx = exprStackIdx + 1;
   }
-  printd(numStack[0]);
-  // printf("%f", numStack[0]);
+  printf("%f", numStack[0]);
   return 0;
 }
 

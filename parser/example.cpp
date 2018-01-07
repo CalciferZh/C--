@@ -3,9 +3,17 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
   //Lexer lexer("../calculator/main.c");
-  Lexer lexer("1.c");
+  if (argc == 1) {
+    std::cout << "Need filename";
+    return 0;
+  }
+  if (argc > 2) {
+    std::cout << "Too many arguments";
+    return 0;
+  }
+  Lexer lexer(argv[1]);
   vector<Token> strm = lexer.analyze();
   Parser parser(strm);
   parser.parse();

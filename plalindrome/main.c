@@ -1,5 +1,3 @@
-extern void printd(int decimal);
-
 int main() {
   char str[32] = "a sys a";
   int i = 0;
@@ -13,6 +11,10 @@ int main() {
     }
     i = i + 1;
   }
-  printd(flag);
+  if (flag == 1) {
+    printf("false");
+  } else {
+    printf("true");
+  }
   return 0;
 }
