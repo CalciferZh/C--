@@ -86,6 +86,8 @@ public:
 
   std::unique_ptr<ExprAST> parseSingleExpr(); // parse expressions as a single statement, i.e. a = max(b,c);
 
+  std::unique_ptr<ExprAST> parseInitListExpr();
+
   std::vector<std::unique_ptr<ExprAST>> parseParams();
 
   std::vector<std::unique_ptr<Variable>> parseArguments();

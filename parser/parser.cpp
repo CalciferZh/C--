@@ -124,13 +124,34 @@ std::unique_ptr<ExprAST> Parser::parseDeclareExpr() {
   std::unique_ptr<ExprAST> init = nullptr;
   if (tkStream[curIdx].tp == tok_assignOp) {
     ++curIdx; // eat '='
-    init = parseExpression();
+    if (tkStream[curIdx].tp == tok_lBrace) {
+      init = parseInitListExpr();
+    } else {
+      init = parseExpression();
+    }
   }
   if (tkStream[curIdx].tp != tok_semicolon) {
     throw ParseException("';'", tkStream[curIdx].val.c_str(), tkStream[curIdx].lineNo);
   }
   ++curIdx; // est ';'
   return llvm::make_unique<DeclareExprAST>(varTp, std::move(name), size, std::move(init));
+}
+
+std::unique_ptr<ExprAST> Parser::parseInitListExpr() {
+  std::vector<std::unique_ptr<ExprAST>> list;
+  ++curIdx; // eat '{'
+  while (tkStream[curIdx].tp != tok_rBrace) {
+    list.emplace_back(parseExpression());
+    if (tkStream[curIdx].tp != tok_comma) {
+      break;
+    }
+    ++curIdx; // eat ','
+  }
+  if (tkStream[curIdx].tp != tok_rBrace) {
+    throw ParseException("'}'", tkStream[curIdx].val.c_str(), tkStream[curIdx].lineNo);
+  }
+  ++curIdx; // eat '}'
+  return llvm::make_unique<InitListExprAST>(std::move(list));
 }
 
 std::unique_ptr<ExprAST> Parser::parsePrimary() {

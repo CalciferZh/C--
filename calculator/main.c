@@ -1,5 +1,5 @@
-// extern void printd(double val);
-#include <stdio.h>
+extern void printd(double val);
+// #include <stdio.h>
 
 int isOp(char ch) {
   if (ch == '+') {
@@ -28,12 +28,13 @@ int main() {
   int rawStrLen = 7;
   int rawStrIdx = 0;
 
-  int prec[7];
-  prec[0] = 0;
-  prec[1] = 1;
-  prec[2] = 1;
-  prec[3] = 2;
-  prec[4] = 2;
+  int prec[7] = {0, 1, 1, 2, 2};
+  // int prec[7];
+  // prec[0] = 0;
+  // prec[1] = 1;
+  // prec[2] = 1;
+  // prec[3] = 2;
+  // prec[4] = 2;
 
   // polish expression
   int exprStack[128];
@@ -151,8 +152,8 @@ int main() {
     }
     exprStackIdx = exprStackIdx + 1;
   }
-  // printd(numStack[0]);
-  printf("%f", numStack[0]);
+  printd(numStack[0]);
+  // printf("%f", numStack[0]);
   return 0;
 }
 

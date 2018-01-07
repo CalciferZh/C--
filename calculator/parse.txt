@@ -7,8 +7,7 @@ Function: {
       return type: -32
     }
   }
-  body: {
-  }
+  body: {}
 }
 
 Function: {
@@ -42,8 +41,7 @@ Function: {
           Integer: 1
         }
       }
-      else body: {
-      }
+      else body: {}
     }
     If-else: {
       condition: {
@@ -66,8 +64,7 @@ Function: {
           Integer: 2
         }
       }
-      else body: {
-      }
+      else body: {}
     }
     If-else: {
       condition: {
@@ -90,8 +87,7 @@ Function: {
           Integer: 3
         }
       }
-      else body: {
-      }
+      else body: {}
     }
     If-else: {
       condition: {
@@ -114,8 +110,7 @@ Function: {
           Integer: 4
         }
       }
-      else body: {
-      }
+      else body: {}
     }
     If-else: {
       condition: {
@@ -138,8 +133,7 @@ Function: {
           Integer: 5
         }
       }
-      else body: {
-      }
+      else body: {}
     }
     If-else: {
       condition: {
@@ -162,8 +156,7 @@ Function: {
           Integer: 6
         }
       }
-      else body: {
-      }
+      else body: {}
     }
     return: {
       Integer: 0
@@ -184,14 +177,14 @@ Function: {
       name: rawStr
       size: 128
       init: {
-        String: 1+(52-2)*4/(2+1)
+        String: 1+5/5*5
       }
     }
     Declaration for -27: {
       name: rawStrLen
       size: 0
       init: {
-        Integer: 16
+        Integer: 7
       }
     }
     Declaration for -27: {
@@ -199,6 +192,18 @@ Function: {
       size: 0
       init: {
         Integer: 0
+      }
+    }
+    Declaration for -27: {
+      name: prec
+      size: 7
+      init: {
+        Init-list:
+        Integer: 0
+        Integer: 1
+        Integer: 1
+        Integer: 2
+        Integer: 2
       }
     }
     Declaration for -27: {
@@ -299,6 +304,20 @@ Function: {
         Integer: 0
       }
     }
+    Declaration for -27: {
+      name: precInStack
+      size: 0
+      init: {
+        None
+      }
+    }
+    Declaration for -27: {
+      name: precOutStack
+      size: 0
+      init: {
+        None
+      }
+    }
     expression: -5 {
       LHS: {
         Variable: {
@@ -362,7 +381,7 @@ Function: {
           }
         }
       }
-      body:{
+      body: {
         expression: -5 {
           LHS: {
             Variable: {
@@ -440,10 +459,17 @@ Function: {
             }
             If-else: {
               condition: {
-                Variable: {
-                  name: isLastEleNum
-                  offset: {
-                    null
+                expression: -20 {
+                  LHS: {
+                    Variable: {
+                      name: isLastEleNum
+                      offset: {
+                        null
+                      }
+                    }
+                  }
+                  RHS: {
+                    Integer: 1
                   }
                 }
               }
@@ -580,8 +606,7 @@ Function: {
               }
             }
           }
-          else body: {
-          }
+          else body: {}
         }
         If-else: {
           condition: {
@@ -661,79 +686,29 @@ Function: {
               condition: {
                 expression: -36 {
                   LHS: {
-                    expression: -36 {
+                    expression: -20 {
                       LHS: {
-                        expression: -36 {
-                          LHS: {
-                            expression: -20 {
+                        Variable: {
+                          name: opStack
+                          offset: {
+                            expression: -12 {
                               LHS: {
                                 Variable: {
-                                  name: opStack
+                                  name: opStackHead
                                   offset: {
-                                    expression: -12 {
-                                      LHS: {
-                                        Variable: {
-                                          name: opStackHead
-                                          offset: {
-                                            null
-                                          }
-                                        }
-                                      }
-                                      RHS: {
-                                        Integer: 1
-                                      }
-                                    }
+                                    null
                                   }
                                 }
                               }
                               RHS: {
-                                Integer: 5
-                              }
-                            }
-                          }
-                          RHS: {
-                            expression: -20 {
-                              LHS: {
-                                Variable: {
-                                  name: opStack
-                                  offset: {
-                                    expression: -12 {
-                                      LHS: {
-                                        Variable: {
-                                          name: opStackHead
-                                          offset: {
-                                            null
-                                          }
-                                        }
-                                      }
-                                      RHS: {
-                                        Integer: 1
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                              RHS: {
-                                Integer: 6
+                                Integer: 1
                               }
                             }
                           }
                         }
                       }
                       RHS: {
-                        expression: -20 {
-                          LHS: {
-                            Variable: {
-                              name: tmpSymbol
-                              offset: {
-                                null
-                              }
-                            }
-                          }
-                          RHS: {
-                            Integer: 3
-                          }
-                        }
+                        Integer: 5
                       }
                     }
                   }
@@ -741,14 +716,26 @@ Function: {
                     expression: -20 {
                       LHS: {
                         Variable: {
-                          name: tmpSymbol
+                          name: opStack
                           offset: {
-                            null
+                            expression: -12 {
+                              LHS: {
+                                Variable: {
+                                  name: opStackHead
+                                  offset: {
+                                    null
+                                  }
+                                }
+                              }
+                              RHS: {
+                                Integer: 1
+                              }
+                            }
                           }
                         }
                       }
                       RHS: {
-                        Integer: 4
+                        Integer: 6
                       }
                     }
                   }
@@ -808,39 +795,9 @@ Function: {
                 expression: -5 {
                   LHS: {
                     Variable: {
-                      name: opStackHead
+                      name: tmp
                       offset: {
                         null
-                      }
-                    }
-                  }
-                  RHS: {
-                    expression: -12 {
-                      LHS: {
-                        Variable: {
-                          name: opStackHead
-                          offset: {
-                            null
-                          }
-                        }
-                      }
-                      RHS: {
-                        Integer: 1
-                      }
-                    }
-                  }
-                }
-                expression: -5 {
-                  LHS: {
-                    Variable: {
-                      name: exprStack
-                      offset: {
-                        Variable: {
-                          name: exprStackHead
-                          offset: {
-                            null
-                          }
-                        }
                       }
                     }
                   }
@@ -848,6 +805,116 @@ Function: {
                     Variable: {
                       name: opStack
                       offset: {
+                        expression: -12 {
+                          LHS: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                expression: -5 {
+                  LHS: {
+                    Variable: {
+                      name: precInStack
+                      offset: {
+                        null
+                      }
+                    }
+                  }
+                  RHS: {
+                    Variable: {
+                      name: prec
+                      offset: {
+                        Variable: {
+                          name: tmp
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                expression: -5 {
+                  LHS: {
+                    Variable: {
+                      name: precOutStack
+                      offset: {
+                        null
+                      }
+                    }
+                  }
+                  RHS: {
+                    Variable: {
+                      name: prec
+                      offset: {
+                        Variable: {
+                          name: tmpSymbol
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                If-else: {
+                  condition: {
+                    expression: -19 {
+                      LHS: {
+                        Variable: {
+                          name: precOutStack
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                      RHS: {
+                        Variable: {
+                          name: precInStack
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                  if body: {
+                    expression: -5 {
+                      LHS: {
+                        Variable: {
+                          name: opStack
+                          offset: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                        }
+                      }
+                      RHS: {
+                        Variable: {
+                          name: tmpSymbol
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                    }
+                    expression: -5 {
+                      LHS: {
                         Variable: {
                           name: opStackHead
                           offset: {
@@ -855,38 +922,96 @@ Function: {
                           }
                         }
                       }
-                    }
-                  }
-                }
-                expression: -5 {
-                  LHS: {
-                    Variable: {
-                      name: isOpEle
-                      offset: {
-                        Variable: {
-                          name: exprStackHead
-                          offset: {
-                            null
+                      RHS: {
+                        expression: -11 {
+                          LHS: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 1
                           }
                         }
                       }
                     }
                   }
-                  RHS: {
-                    Integer: 1
-                  }
-                }
-                expression: -5 {
-                  LHS: {
-                    Variable: {
-                      name: exprStackHead
-                      offset: {
-                        null
+                  else body: {
+                    expression: -5 {
+                      LHS: {
+                        Variable: {
+                          name: opStackHead
+                          offset: {
+                            null
+                          }
+                        }
+                      }
+                      RHS: {
+                        expression: -12 {
+                          LHS: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 1
+                          }
+                        }
                       }
                     }
-                  }
-                  RHS: {
-                    expression: -11 {
+                    expression: -5 {
+                      LHS: {
+                        Variable: {
+                          name: exprStack
+                          offset: {
+                            Variable: {
+                              name: exprStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                        }
+                      }
+                      RHS: {
+                        Variable: {
+                          name: opStack
+                          offset: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    expression: -5 {
+                      LHS: {
+                        Variable: {
+                          name: isOpEle
+                          offset: {
+                            Variable: {
+                              name: exprStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                        }
+                      }
+                      RHS: {
+                        Integer: 1
+                      }
+                    }
+                    expression: -5 {
                       LHS: {
                         Variable: {
                           name: exprStackHead
@@ -896,45 +1021,45 @@ Function: {
                         }
                       }
                       RHS: {
-                        Integer: 1
+                        expression: -11 {
+                          LHS: {
+                            Variable: {
+                              name: exprStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 1
+                          }
+                        }
                       }
                     }
-                  }
-                }
-                expression: -5 {
-                  LHS: {
-                    Variable: {
-                      name: opStack
-                      offset: {
+                    expression: -5 {
+                      LHS: {
                         Variable: {
-                          name: opStackHead
+                          name: opStack
+                          offset: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                        }
+                      }
+                      RHS: {
+                        Variable: {
+                          name: tmpSymbol
                           offset: {
                             null
                           }
                         }
                       }
                     }
-                  }
-                  RHS: {
-                    Variable: {
-                      name: tmpSymbol
-                      offset: {
-                        null
-                      }
-                    }
-                  }
-                }
-                expression: -5 {
-                  LHS: {
-                    Variable: {
-                      name: opStackHead
-                      offset: {
-                        null
-                      }
-                    }
-                  }
-                  RHS: {
-                    expression: -11 {
+                    expression: -5 {
                       LHS: {
                         Variable: {
                           name: opStackHead
@@ -944,7 +1069,19 @@ Function: {
                         }
                       }
                       RHS: {
-                        Integer: 1
+                        expression: -11 {
+                          LHS: {
+                            Variable: {
+                              name: opStackHead
+                              offset: {
+                                null
+                              }
+                            }
+                          }
+                          RHS: {
+                            Integer: 1
+                          }
+                        }
                       }
                     }
                   }
@@ -952,8 +1089,7 @@ Function: {
               }
             }
           }
-          else body: {
-          }
+          else body: {}
         }
         If-else: {
           condition: {
@@ -1021,8 +1157,7 @@ Function: {
               }
             }
           }
-          else body: {
-          }
+          else body: {}
         }
         If-else: {
           condition: {
@@ -1086,7 +1221,7 @@ Function: {
                   Integer: 5
                 }
               }
-              body:{
+              body: {
                 expression: -5 {
                   LHS: {
                     Variable: {
@@ -1186,8 +1321,7 @@ Function: {
               }
             }
           }
-          else body: {
-          }
+          else body: {}
         }
         expression: -5 {
           LHS: {
@@ -1278,7 +1412,7 @@ Function: {
           Integer: 1
         }
       }
-      body:{
+      body: {
         expression: -5 {
           LHS: {
             Variable: {
@@ -1397,18 +1531,25 @@ Function: {
           }
         }
       }
-      body:{
+      body: {
         If-else: {
           condition: {
-            Variable: {
-              name: isOpEle
-              offset: {
+            expression: -20 {
+              LHS: {
                 Variable: {
-                  name: exprStackIdx
+                  name: isOpEle
                   offset: {
-                    null
+                    Variable: {
+                      name: exprStackIdx
+                      offset: {
+                        null
+                      }
+                    }
                   }
                 }
+              }
+              RHS: {
+                Integer: 1
               }
             }
           }
@@ -1551,8 +1692,7 @@ Function: {
                   }
                 }
               }
-              else body: {
-              }
+              else body: {}
             }
             If-else: {
               condition: {
@@ -1607,8 +1747,7 @@ Function: {
                   }
                 }
               }
-              else body: {
-              }
+              else body: {}
             }
             If-else: {
               condition: {
@@ -1663,8 +1802,7 @@ Function: {
                   }
                 }
               }
-              else body: {
-              }
+              else body: {}
             }
             If-else: {
               condition: {
@@ -1719,8 +1857,7 @@ Function: {
                   }
                 }
               }
-              else body: {
-              }
+              else body: {}
             }
             expression: -5 {
               LHS: {
