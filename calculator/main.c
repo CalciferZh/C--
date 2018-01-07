@@ -1,5 +1,5 @@
-extern void printd(double val);
 // #include <stdio.h>
+// #include <string.h>
 
 int isOp(char ch) {
   if (ch == '+') {
@@ -24,17 +24,13 @@ int isOp(char ch) {
 }
 
 int main() {
-  char rawStr[128] = "1+5/5*5";
-  int rawStrLen = 7;
+  char rawStr[128];
+  printf("expression: ");
+  scanf("%s", rawStr);
+  int rawStrLen = strlen(rawStr);
   int rawStrIdx = 0;
 
   int prec[7] = {0, 1, 1, 2, 2};
-  // int prec[7];
-  // prec[0] = 0;
-  // prec[1] = 1;
-  // prec[2] = 1;
-  // prec[3] = 2;
-  // prec[4] = 2;
 
   // polish expression
   int exprStack[128];
@@ -152,8 +148,7 @@ int main() {
     }
     exprStackIdx = exprStackIdx + 1;
   }
-  printd(numStack[0]);
-  // printf("%f", numStack[0]);
+  printf("result: %f\n", numStack[0]);
   return 0;
 }
 
