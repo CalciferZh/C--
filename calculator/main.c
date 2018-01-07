@@ -24,8 +24,8 @@ int isOp(char ch) {
 }
 
 int main() {
-  char rawStr[128] = "1+(5-2)*4/(2+1)";
-  int rawStrLen = 15;
+  char rawStr[128] = "1+(52-2)*4/(2+1)";
+  int rawStrLen = 16;
   int rawStrIdx = 0;
 
   // polish expression
@@ -46,7 +46,8 @@ int main() {
   double rhs = 0;
   double res = 0;
 
-  int i;
+  int tmp;
+  int isLastEleNum = 0;
 
   opStack[opStackHead] = 5;
   opStackHead = opStackHead + 1;
@@ -54,13 +55,19 @@ int main() {
   while (rawStrIdx < rawStrLen) {
     tmpSymbol = isOp(rawStr[rawStrIdx]);
     if (tmpSymbol == 0) {
-      exprStack[exprStackHead] = rawStr[rawStrIdx] - '0';
-      isOpEle[exprStackHead] = 0;
-      exprStackHead = exprStackHead + 1;
+      tmp = rawStr[rawStrIdx] - '0';
+      if (isLastEleNum) {
+        // if last element is also a number
+        // the two number should be 'combined'
+        exprStack[exprStackHead - 1] = exprStack[exprStackHead - 1] * 10 + tmp;
+      } else {
+        exprStack[exprStackHead] = tmp;
+        isOpEle[exprStackHead] = 0;
+        exprStackHead = exprStackHead + 1;
+      }
     }
     if (tmpSymbol == 1 || tmpSymbol == 2 || tmpSymbol == 3 || tmpSymbol == 4) {
-      if (opStack[opStackHead - 1] == 6 || opStack[opStackHead - 1] == 5 || tmpSymbol == 3 || tmpSymbol == 4)
-      {
+      if (opStack[opStackHead - 1] == 5 || opStack[opStackHead - 1] == 6 || tmpSymbol == 3 || tmpSymbol == 4) {
         opStack[opStackHead] = tmpSymbol;
         opStackHead = opStackHead + 1;
       } else {
@@ -86,6 +93,20 @@ int main() {
       }
     }
     rawStrIdx = rawStrIdx + 1;
+    if (tmpSymbol == 0) {
+      isLastEleNum = 1;
+    } else {
+      isLastEleNum = 0;
+    }
+
+    // printf("=================================================\n");
+    // for (tmp = 0; tmp < exprStackHead; ++tmp) {
+    //   printf("%d %d\n", exprStack[tmp], isOpEle[tmp]);
+    // }
+    // printf("-------------------------------------------------\n");
+    // for (tmp = 0; tmp < opStackHead; ++tmp) {
+    //   printf("%d\n", opStack[tmp]);
+    // }
   }
 
   // we use 1 since opStack[0] is '('
@@ -95,6 +116,12 @@ int main() {
     isOpEle[exprStackHead] = 1;
     exprStackHead = exprStackHead + 1;
   }
+
+  // printf("=================================================\n");
+  // for (tmp = 0; tmp < exprStackHead; ++tmp) {
+  //   printf("%d %d\n", exprStack[tmp], isOpEle[tmp]);
+  // }
+
   while (exprStackIdx != exprStackHead) {
     if (isOpEle[exprStackIdx]) {
       rhs = numStack[numStackHead - 1];
