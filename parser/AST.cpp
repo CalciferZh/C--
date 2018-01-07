@@ -25,7 +25,7 @@ llvm::Type* getLLVMType(int tok_type, llvm::LLVMContext& context) {
 }
 
 int getTokType(llvm::Type* type) {
-  if (type->isFloatTy())
+  if (type->isDoubleTy())
     return tok_doubleType;
   if (type->isIntegerTy(8))
     return tok_charType;
@@ -60,7 +60,8 @@ llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
     return builder.CreateLoad(varTable[name]->addr, name.c_str());
   } else {
     llvm::Value* len = offset->codegen(builder, varTable, context, module);
-    llvm::Value* ptr = builder.CreateInBoundsGEP(varTable[name]->addr, len);
+    llvm::Value* indexList[2] = {llvm::ConstantInt::get(len->getType(), 0), len};
+    llvm::Value* ptr = builder.CreateInBoundsGEP(varTable[name]->addr, indexList);
     return builder.CreateLoad(ptr, name.c_str());
   }
 }
@@ -78,9 +79,20 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
       L = varTable[lhs->name]->addr;
     else {
       llvm::Value* len = lhs->offset->codegen(builder, varTable, context, module);
-      L = builder.CreateInBoundsGEP(varTable[lhs->name]->addr, len);
+      llvm::Value* indexList[2] = {llvm::ConstantInt::get(len->getType(), 0), len};
+      L = builder.CreateInBoundsGEP(varTable[lhs->name]->addr, indexList);
     }
     llvm::Value* R = RHS->codegen(builder, varTable, context, module);
+    llvm::Type* lType = L->getType();
+    if (lType->isPointerTy())
+      lType = lType->getContainedType(0);
+    if (lType->isDoubleTy()  && !R->getType()->isDoubleTy()) {
+      R = builder.CreateSIToFP(R, llvm::Type::getDoubleTy(context));
+    }
+    if (lType->isIntegerTy() && R->getType()->isDoubleTy()) {
+      R = builder.CreateFPToSI(R, llvm::Type::getInt32Ty(context));
+    }
+    std::cout<<"lhs: " << lType->getTypeID() << " rhs: " << R->getType()->getTypeID() << std::endl;
     // vica: need change type maybe
     return builder.CreateStore(R, L, false);
   }
@@ -88,12 +100,12 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
   llvm::Value* R = RHS->codegen(builder, varTable, context, module);
   if (!L || !R)
     return nullptr;
-  bool isFloat = L->getType()->isFloatTy() || L->getType()->isFloatTy();
+  bool isFloat = L->getType()->isDoubleTy() || L->getType()->isDoubleTy();
   if (op == tok_logicAndOp || op == tok_logicOrOp) { // change to UI int1
-    if (L->getType()->isFloatTy()) {
+    if (L->getType()->isDoubleTy()) {
       L = builder.CreateFPToUI(L, llvm::Type::getInt1Ty(context));
     }
-    if (R->getType()->isFloatTy()) {
+    if (R->getType()->isDoubleTy()) {
       R = builder.CreateFPToUI(L, llvm::Type::getInt1Ty(context));
     }
     if (!L->getType()->isIntegerTy(1)) {
@@ -104,10 +116,10 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
     }
   } else { 
     if (isFloat) { // is float, change to double both
-      if (!L->getType()->isFloatTy()) {
+      if (!L->getType()->isDoubleTy()) {
         L = builder.CreateSIToFP(L, llvm::Type::getDoubleTy(context));
       }
-      if (!R->getType()->isFloatTy()) {
+      if (!R->getType()->isDoubleTy()) {
         R = builder.CreateSIToFP(R, llvm::Type::getDoubleTy(context));
       }
     } else { // not float, change to i32 both
