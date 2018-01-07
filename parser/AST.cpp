@@ -319,10 +319,12 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
     std::cout << "Unknown function\n";
     return nullptr;
   }
+  /*
   if (params.size() != func->arg_size()) {
     std::cout << "Unmatch arguments\n";
     return nullptr;
   }
+  */
   std::vector<llvm::Value*> Params;
   for (auto& param : params) {
     llvm::Value* v = param->codegen(builder, varTable, context, module);
