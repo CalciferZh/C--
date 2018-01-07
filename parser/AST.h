@@ -289,6 +289,20 @@ public:
   int getClassType() override { return 12; }
 };
 
+class InitListExprAST : public ExprAST {
+public:
+  std::vector<std::unique_ptr<ExprAST>> initList;
+
+  InitListExprAST(std::vector<std::unique_ptr<ExprAST>> initList) : initList(std::move(initList)) {}
+
+  void print() override {
+    std::cout << "Init-list:\n";
+    for (const auto& expr: initList) {
+      expr->print();
+    }
+  }
+};
+
 class PrototypeAST {
 public:
   std::string name;

@@ -24,4 +24,3 @@ int main(int argc, char* argv[]) {
   parser.module->print(llvm::errs(), nullptr);
   return 0;
 }
-
