@@ -19,4 +19,16 @@ public:
   }
 };
 
+class CodegenException {
+public:
+
+  std::string msg;
+
+  CodegenException(std::string msg) : msg(msg){}
+
+  void print() {
+    std::cerr << msg;
+  }
+};
+
 #endif

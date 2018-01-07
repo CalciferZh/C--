@@ -31,7 +31,7 @@ int main() {
   int rawStrIdx = 0;
 
   int prec[7] = {0, 1, 1, 2, 2};
-
+  
   // polish expression
   int exprStack[128];
   int isOpEle[128];

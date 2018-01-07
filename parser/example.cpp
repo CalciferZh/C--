@@ -19,7 +19,11 @@ int main(int argc, char* argv[]) {
   parser.parse();
   //parser.print();
   for (auto& ptr : parser.functions) {
-    ptr->codegen(parser.builder, parser.varTable, parser.context ,parser.module);
+    try {
+      ptr->codegen(parser.builder, parser.varTable, parser.context ,parser.module);
+    } catch (CodegenException &e) {
+      e.print();
+    }
   }
   parser.module->print(llvm::errs(), nullptr);
   return 0;

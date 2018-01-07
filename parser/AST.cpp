@@ -1,7 +1,7 @@
 #include "AST.h"
+#include "exception.h"
 #include "../lexer/token.h"
 
-// Vica: this is so dirty...
 std::vector<llvm::BasicBlock*> breakWhile;
 
 #define NOOUPUT if(false)
@@ -53,8 +53,6 @@ llvm::Value* Assign(llvm::Value* L, llvm::Value* R, llvm::IRBuilder<>& builder, 
         R = builder.CreateSExt(R, lType);
     }
   }
-  //std::cout<<"lhs: " << lType->getTypeID() << " rhs: " << R->getType()->getTypeID() << std::endl;
-  //std::cout<<"lhs.weight: " << lType->getIntegerBitWidth() << " rhs.weight: " << R->getType()->getIntegerBitWidth() << std::endl;
   return builder.CreateStore(R, L, false);
 }
 
@@ -99,7 +97,7 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: BinaryExpr\n";
   if (op == tok_assignOp) { // assign is special 
     if (LHS->getClassType() != 5) {
-      std::cout << "lvalue should be variable\n";
+      throw CodegenException("lvalue of assignment expression should be variable");
       return nullptr;
     }
     VariableExprAST* lhs = static_cast<VariableExprAST*>(LHS.get());
@@ -116,8 +114,12 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
   }
   llvm::Value* L = LHS->codegen(builder, varTable, context, module);
   llvm::Value* R = RHS->codegen(builder, varTable, context, module);
-  if (!L || !R) {
-    std::cout << "L or R fail in binaryexpr\n";
+  if (!L) {
+    throw CodegenException("Generate rhs of binaryexpr fail");
+    return nullptr;
+  }
+  if (!R) {
+    throw CodegenException("Generate rhs of binaryexpr fail");
     return nullptr;
   }
   bool isFloat = L->getType()->isDoubleTy() || L->getType()->isDoubleTy();
@@ -175,7 +177,7 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
   case tok_logicAndOp:
     return builder.CreateAnd(L, R, "andtmp");
   default:
-    std::cout << "unknown binary operator\n";
+    throw CodegenException("Unknown binary operator");
     return nullptr;
   }
 }
@@ -183,12 +185,15 @@ llvm::Value* BinaryExprAST::codegen(CODEGENPARM) {
 llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: DeclareExpr\n";
   if (varTable.find(name) != varTable.end()) {
-    std::cout << "Variable redefinition\n";
+    std::string msg = "Variable \'";
+    msg += name;
+    msg += "\' redefinition";
+    throw CodegenException(msg);
     return nullptr;
   } else {
     llvm::Type* type = getLLVMType(tp, context);
     if (size < 0) {
-      std::cout << "Negative size\n";
+      throw CodegenException("Negative array size");
       return nullptr;
     }
     if (size != 0) {
@@ -199,36 +204,54 @@ llvm::Value* DeclareExprAST::codegen(CODEGENPARM) {
     llvm::AllocaInst* addr = builder.CreateAlloca(type, 0, nullptr, name.c_str());
     varTable[name] = std::unique_ptr<Variable>(new Variable(name, tp, addr));
   }
-  if (init) {
-    llvm::Value* R = init->codegen(builder, varTable, context, module);
-    // Vica: Since we have create globle string, now we gonna try to figure out how to extern 'puts'
-    if (size != 0) {
-      if (init->getClassType() == 3) {
+  if (init) { // has rvalue
+    if (size != 0) { // about array
+      if (init->getClassType() == 3) { // string
         StringExprAST* str = static_cast<StringExprAST*>(init.get());
         if (str) {
-          if (unsigned(size) < str->val.length()) {
-            std::cout << "Too long\n";
+          if (unsigned(size) < str->val.length() + 1) {
+            throw CodegenException("String size is too small");
             return nullptr;
           }
+          llvm::Value* R = init->codegen(builder, varTable, context, module);
           llvm::Value* L = builder.CreateBitCast(varTable[name]->addr, llvm::Type::getInt8PtrTy(context));
           builder.CreateMemCpy(L, R, str->val.length() + 1, 1, false);
+          return varTable[name]->addr;
+        }
+      } else { // other array
+        if (init->getClassType() == 13) {
+          InitListExprAST* list = static_cast<InitListExprAST*>(init.get());
+          if (unsigned(size) < list->initList.size()) {
+            throw CodegenException("Array size is too small");
+            return nullptr;
+          }
+          unsigned idx = 0;
+          for (auto& expr : list->initList) {
+            llvm::Value* indexList[2] = {llvm::ConstantInt::get(context, llvm::APInt(32, 0, true)), llvm::ConstantInt::get(context, llvm::APInt(32, idx, true))};
+            llvm::Value* L = builder.CreateInBoundsGEP(varTable[name]->addr, indexList);
+            llvm::Value* R = expr->codegen(builder, varTable, context, module);
+            Assign(L, R, builder, context);
+            idx++;
+          }
+          return varTable[name]->addr;
         }
       }
-      // Vica: how to init an array? 
-    } else {
+    } else { // single type
+      llvm::Value* R = init->codegen(builder, varTable, context, module);
       Assign(varTable[name]->addr, R, builder, context);
+      return varTable[name]->addr;
     }
-    return R;
   } else {
     return varTable[name]->addr;
   }
+  return varTable[name]->addr;
 }
 
 llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: IfExpr\n";
   llvm::Value* CondV = cond->codegen(builder, varTable, context, module);
   if (!CondV) {
-    std::cout << "Error in condition\n";
+    throw CodegenException("Error in If Condition");
     return nullptr;
   }
   // CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "ifcond");
@@ -244,7 +267,7 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   for (auto& then : ifBody) {
     llvm::Value* ThenV = then->codegen(builder, varTable, context, module);
     if (!ThenV) {
-      std::cout << "Error in then\n";
+      throw CodegenException("Error in If Then Block");
       return nullptr;
     }
   }
@@ -257,7 +280,7 @@ llvm::Value* IfExprAST::codegen(CODEGENPARM) {
   for (auto& elsse : elseBody) {
     llvm::Value *ElseV = elsse->codegen(builder, varTable, context, module);
     if (!ElseV) {
-      std::cout << "Error in else\n";
+      throw CodegenException("Error in If Else Block");
       return nullptr;
     }
   }
@@ -282,7 +305,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   builder.SetInsertPoint(CondBB);
   llvm::Value* CondV = cond->codegen(builder, varTable, context, module);
   if (!CondV) {
-    std::cout << "Error in condition\n";
+    throw CodegenException("Error in While Condition");
     return nullptr;
   }
   // CondV = builder.CreateFCmpONE(CondV, llvm::ConstantFP::get(context, llvm::APFloat(0.0)), "whilecondtmp");
@@ -293,7 +316,7 @@ llvm::Value* WhileExprAST::codegen(CODEGENPARM) {
   for (auto& b : body) {
     llvm::Value* BodyV = b->codegen(builder, varTable, context, module);
     if (!BodyV) {
-        std::cout << "Error in body\n";
+        throw CodegenException("Error in While Body Block");
         return nullptr;
       }
   }
@@ -315,15 +338,18 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
   // Vica: need to get the func
   llvm::Function* func = module->getFunction(callee);
   if (!func) {
-    std::cout << "Unknown function\n";
+    std::string msg = "Unknown function ";
+    msg += callee;
+    throw CodegenException(msg);
     return nullptr;
   }
-  /*
-  if (params.size() != func->arg_size()) {
-    std::cout << "Unmatch arguments\n";
+
+  if (!func->isVarArg() && params.size() != func->arg_size()){
+    char buff[512];
+    snprintf(buff, sizeof(buff), "Calling %s fail, expect %zu argument(s) but %zu provided", callee.c_str(), func->arg_size(), params.size());
+    throw CodegenException(std::string(buff));
     return nullptr;
   }
-  */
   std::vector<llvm::Value*> Params;
   for (auto& param : params) {
     llvm::Value* v = param->codegen(builder, varTable, context, module);
@@ -337,7 +363,7 @@ llvm::Value* BreakExprAST::codegen(CODEGENPARM) {
   if (!breakWhile.empty()) {
     return builder.CreateBr(breakWhile.back());
   } else {
-    std::cout << "No loop\n";
+    throw CodegenException("No loop to break");
     return nullptr;
   }
 }
@@ -371,7 +397,9 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
     func = proto->codegen(builder, varTable, context, module);
 
   if (!func) {
-    std::cout << "Generating: Function Fail\n";
+    std::string msg = "Fail to generate function ";
+    msg += proto->name;
+    throw CodegenException(msg);
     return nullptr;
   }
 

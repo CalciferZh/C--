@@ -16,7 +16,7 @@ cl.ll: 1.c
 	clang -emit-llvm 1.c -S -o cl.ll
 
 my.ll: 1.c
-	./example 2>>my.ll
+	./example 1.c 2>>my.ll
 
 clean:
 	rm -rf my* cl*
