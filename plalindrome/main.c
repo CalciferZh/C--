@@ -1,5 +1,3 @@
-extern void printd(int decimal);
-
 int main() {
   char str[32] = "a sys a";
   int i = 0;
