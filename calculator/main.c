@@ -31,7 +31,7 @@ int main() {
   int rawStrIdx = 0;
 
   int prec[7] = {0, 1, 1, 2, 2};
-
+  
   // polish expression
   int exprStack[128];
   int isOpEle[128];
@@ -52,6 +52,7 @@ int main() {
 
   int tmp;
   int isLastEleNum = 0;
+  char ch;
 
   int precInStack;
   int precOutStack;
@@ -60,7 +61,26 @@ int main() {
   opStackHead = opStackHead + 1;
 
   while (rawStrIdx < rawStrLen) {
-    tmpSymbol = isOp(rawStr[rawStrIdx]);
+    ch = rawStr[rawStrIdx];
+    tmpSymbol = 0;
+    if (ch == '+') {
+      tmpSymbol = 1;
+    }
+    if (ch == '-') {
+      tmpSymbol = 2;
+    }
+    if (ch == '*') {
+      tmpSymbol = 3;
+    }
+    if (ch == '/') {
+      tmpSymbol = 4;
+    }
+    if (ch == '(') {
+      tmpSymbol = 5;
+    }
+    if (ch == ')') {
+      tmpSymbol = 6;
+    }
     if (tmpSymbol == 0) {
       tmp = rawStr[rawStrIdx] - '0';
       if (isLastEleNum == 1) {

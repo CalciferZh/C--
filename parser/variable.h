@@ -15,10 +15,10 @@ public:
 
   int tp;
 
-  llvm::AllocaInst* addr;
-
-  Variable(std::string name, int tp, llvm::AllocaInst* addr = nullptr) : name(std::move(name)), tp(tp), addr(addr) {}
-
+  //llvm::AllocaInst* addr;
+  llvm::Value* addr;
+  //Variable(std::string name, int tp, llvm::AllocaInst* addr = nullptr) : name(std::move(name)), tp(tp), addr(addr) {}
+  Variable(std::string name, int tp, llvm::Value* addr = nullptr) : name(std::move(name)), tp(tp), addr(addr) {}
   void print() {
     std::cout << "(" << tp << ")" << name << '\n';
   }

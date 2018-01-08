@@ -11,6 +11,10 @@ int main() {
     }
     i = i + 1;
   }
-  printd(flag);
+  if (flag == 1) {
+    printf("false");
+  } else {
+    printf("true");
+  }
   return 0;
 }

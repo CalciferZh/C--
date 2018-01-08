@@ -43,7 +43,15 @@ public:
 
   size_t curIdx;
 
-  Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)), builder(llvm::IRBuilder<>(context)) {}
+  // Vica: maybe need to do some init jobs like declare the function puts
+  Parser(std::vector<Token> tkStream) : tkStream(std::move(tkStream)), builder(llvm::IRBuilder<>(context)),
+    module(llvm::make_unique<llvm::Module>("gg myfriend", context)) {
+      llvm::FunctionType* FT = llvm::FunctionType::get(llvm::IntegerType::getInt32Ty(context), llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0), true);
+      module->getOrInsertFunction("printf", FT);
+      module->getOrInsertFunction("scanf", FT);
+      FT = llvm::FunctionType::get(llvm::IntegerType::getInt64Ty(context), llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0), false);
+      module->getOrInsertFunction("strlen", FT);
+    }
 
   void parse();
 
