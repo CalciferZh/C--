@@ -4,7 +4,6 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  //Lexer lexer("../calculator/main.c");
   if (argc == 1) {
     std::cout << "Need filename";
     return 0;
@@ -17,7 +16,6 @@ int main(int argc, char* argv[]) {
   vector<Token> strm = lexer.analyze();
   Parser parser(strm);
   parser.parse();
-  //parser.print();
   for (auto& ptr : parser.functions) {
     try {
       ptr->codegen(parser.builder, parser.varTable, parser.context ,parser.module);
