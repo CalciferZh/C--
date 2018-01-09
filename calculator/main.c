@@ -2,25 +2,26 @@
 // #include <string.h>
 
 int isOp(char ch) {
+  int type = 0;
   if (ch == '+') {
-    return 1;
+    type = 1;
   }
   if (ch == '-') {
-    return 2;
+    type = 2;
   }
   if (ch == '*') {
-    return 3;
+    type = 3;
   }
   if (ch == '/') {
-    return 4;
+    type = 4;
   }
   if (ch == '(') {
-    return 5;
+    type = 5;
   }
   if (ch == ')') {
-    return 6;
+    type = 6;
   }
-  return 0;
+  return type;
 }
 
 int main() {

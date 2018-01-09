@@ -8,10 +8,10 @@ int main(int argc, char* argv[]) {
     std::cout << "Need filename";
     return 0;
   }
-  if (argc > 2) {
-    std::cout << "Too many arguments";
-    return 0;
-  }
+  // if (argc > 2) {
+  //   std::cout << "Too many arguments";
+  //   return 0;
+  // }
   Lexer lexer(argv[1]);
   vector<Token> strm = lexer.analyze();
   Parser parser(strm);
