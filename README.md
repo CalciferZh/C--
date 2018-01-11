@@ -1,6 +1,6 @@
-# C--
+# c--
 
-C-- is a plastic compiler for simple C grammar, using Flex and LLVM.
+c-- is a plastic compiler for simple C grammar, using Flex and LLVM.
 
 ## Build C--
 
@@ -8,9 +8,9 @@ C-- is a plastic compiler for simple C grammar, using Flex and LLVM.
 
 1. `cd parser/;make`
 
-## Use C--
+## Use c--
 
-1. Copy `Makefile.compile` to the same directory with `C--`
+1. Copy `Makefile.compile` to the same directory with `c--`
 
 1. Edit `Makefile.compile` as you wish and then rename it to `Makefile`
 
