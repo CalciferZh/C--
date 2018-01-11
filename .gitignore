@@ -27,7 +27,7 @@
 
 # Generated Files
 lex.yy.cc
-!
+build/
 
 # Executables
 *.exe
