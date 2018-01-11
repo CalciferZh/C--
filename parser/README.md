@@ -8,28 +8,6 @@ Parser receives a token stream when constructing, which is from lexer.
 Then you can call `Parser::parse` to build the AST for the token stream.
 After parsing, you can call `Parser::print` to see the constructed AST.
 
-### Deduction Rules
-
-In `Parser::parse()`, parser looply parse top-level sentences. The deduction rules are:
-
-* top-level -> statement | function | extern
-
-* statement -> declare | assign | while | if-else | call
-
-* declare -> 'var' identifier '=' expression
-
-* assign -> identifier '=' expression
-
-* expression -> primary (op primary)*
-
-* primary -> '(' expression ')' |  string | integer | real | identifier
-
-* function -> prototype body
-
-* prototype -> identifier '(' identifier* ')'
-
-* body -> statement*
-
 ### Data Member
 
 Parser holds two important data members: `std::vector<std::unique_ptr<ExprAST>> expressions`
