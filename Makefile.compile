@@ -12,7 +12,7 @@ $(TARGET).s:$(TARGET).ll
 	llc -march=x86-64 $(TARGET).ll -o $(TARGET).s
 
 $(TARGET).ll: $(SRC)
-	$(C--) $(SRC) 2>>$(TARGET).ll
+	$(C--) $(SRC) 2>$(TARGET).ll
 
 clean:
 	rm -rf $(TARGET)*
