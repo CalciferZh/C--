@@ -1,17 +1,18 @@
 SRC = path/to/main.c
-TARGET = path/to/output/binary
-CC = GCC
+TARGET = path/to/target
+CC = gcc
+C-- = ./c--
 
 all: $(TARGET)
 
 $(TARGET): $(TARGET).s
-	$(GCC) $(TARGET).s -o $(TARGET)
+	$(CC) $(TARGET).s -o $(TARGET)
 
 $(TARGET).s:$(TARGET).ll
 	llc -march=x86-64 $(TARGET).ll -o $(TARGET).s
 
 $(TARGET).ll: $(SRC)
-	./example $(SRC) 2>>$(TARGET).ll
+	$(C--) $(SRC) 2>>$(TARGET).ll
 
 clean:
 	rm -rf $(TARGET)*

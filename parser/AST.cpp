@@ -422,7 +422,11 @@ llvm::Function* FunctionAST::codegen(CODEGENPARM) {
     selfVarTable[Arg.getName()] = std::unique_ptr<Variable>(new Variable(Arg.getName(), getTokType(Arg.getType()), addr));
   }
   for (auto& b : body) {
-    b->codegen(builder, selfVarTable, context, module);
+    try {
+      b->codegen(builder, selfVarTable, context, module);
+    } catch (CodegenException& e) {
+      e.print();
+    }
   }
   return func;
   // Vica: It tell me there is some bug and delete it wtf?

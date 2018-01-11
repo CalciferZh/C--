@@ -406,12 +406,7 @@ void Parser::print() {
 
 void Parser::generate() {
   for (auto &ptr : functions) {
-    try {
-      ptr->codegen(builder, varTable, context, module);
-    }
-    catch (CodegenException &e) {
-      e.print();
-    }
+    ptr->codegen(builder, varTable, context, module);
   }
   module->print(llvm::errs(), nullptr);
 }

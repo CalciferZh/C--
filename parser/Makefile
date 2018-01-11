@@ -1,4 +1,4 @@
-all: parser.o AST.o
+all: c--
 
 parser.o: parser.h parser.cpp AST.h AST.cpp ../lexer/lex.yy.cc exception.h
 	g++ -c -std=c++11 parser.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core` -o parser.o -fexceptions

@@ -169,7 +169,7 @@ int main() {
     }
     exprStackIdx = exprStackIdx + 1;
   }
-  printf("result: %f\n", numStack[0]);
+  printf("result: %f", numStack[0]);
   return 0;
 }
 

@@ -24,7 +24,10 @@
 *.la
 *.a
 *.lib
+
+# Generated Files
 lex.yy.cc
+!
 
 # Executables
 *.exe
