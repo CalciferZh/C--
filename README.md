@@ -2,7 +2,7 @@
 
 c-- is a plastic compiler for simple C grammar, using Flex and LLVM.
 
-## Build C--
+## Build c--
 
 1. `cd lexer/;make`
 
