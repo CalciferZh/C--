@@ -27,7 +27,7 @@ public:
   CodegenException(std::string msg) : msg(msg){}
 
   void print() {
-    std::cerr << msg;
+    std::cerr << msg << std::endl;
   }
 };
 

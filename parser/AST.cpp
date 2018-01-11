@@ -78,6 +78,13 @@ llvm::Value* CharExprAST::codegen(CODEGENPARM) {
 
 llvm::Value* VariableExprAST::codegen(CODEGENPARM) {
   NOOUPUT std::cout << "Generating: VariableExpr\n";
+  if (varTable.find(name) == varTable.end()) {
+    std::string msg = "Undefined variable \'";
+    msg += name;
+    msg += "\'";
+    throw CodegenException(msg);
+    return nullptr;
+  }
   if (offset == nullptr){
     if (varTable[name]->tp == tok_stringType) {
       llvm::Value* indexList[2] = {llvm::ConstantInt::get(context, llvm::APInt(32, 0, true)), llvm::ConstantInt::get(context, llvm::APInt(32, 0, true))};
@@ -338,8 +345,9 @@ llvm::Value* CallExprAST::codegen(CODEGENPARM) {
   // Vica: need to get the func
   llvm::Function* func = module->getFunction(callee);
   if (!func) {
-    std::string msg = "Unknown function ";
+    std::string msg = "Unknown function \'";
     msg += callee;
+    msg += "\'";
     throw CodegenException(msg);
     return nullptr;
   }
