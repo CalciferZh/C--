@@ -6,8 +6,8 @@ parser.o: parser.h parser.cpp AST.h AST.cpp ../lexer/lex.yy.cc exception.h
 AST.o: AST.h AST.cpp ../lexer/lex.yy.cc
 	g++ -c -std=c++11 AST.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core` -o AST.o -fexceptions
 
-c--: parser.o AST.o ../lexer/lexer.o example.cpp
-	g++ -std=c++11 example.cpp AST.o parser.o ../lexer/lexer.o ../lexer/lex.yy.o `llvm-config --cxxflags --ldflags --system-libs --libs core` -o c-- -fexceptions
+c--: parser.o AST.o ../lexer/lexer.o c--.cpp
+	g++ -std=c++11 c--.cpp AST.o parser.o ../lexer/lexer.o ../lexer/lex.yy.o `llvm-config --cxxflags --ldflags --system-libs --libs core` -o c-- -fexceptions 
 
 clean:
 	rm -rf *.o c--

@@ -403,3 +403,15 @@ void Parser::print() {
     std::cout << '\n';
   }
 }
+
+void Parser::generate() {
+  for (auto &ptr : functions) {
+    try {
+      ptr->codegen(builder, varTable, context, module);
+    }
+    catch (CodegenException &e) {
+      e.print();
+    }
+  }
+  module->print(llvm::errs(), nullptr);
+}
